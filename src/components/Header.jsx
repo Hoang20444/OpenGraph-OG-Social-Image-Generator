@@ -1,0 +1,192 @@
+import React from 'react';
+import { 
+  Sparkles, 
+  Crown, 
+  Coffee, 
+  Code2, 
+  Share2, 
+  Layers, 
+  Zap, 
+  CheckCircle2,
+  ExternalLink
+} from 'lucide-react';
+import { QUICK_PRESETS } from '../data/templates';
+import Logo from './Logo';
+
+export default function Header({ 
+  onApplyPreset, 
+  onOpenPro, 
+  onOpenCoffee, 
+  onOpenMeta, 
+  isPro 
+}) {
+  return (
+    <header className="glass-panel" style={{ 
+      position: 'sticky', 
+      top: 0, 
+      zIndex: 50, 
+      borderBottom: '1px solid var(--border-subtle)',
+      padding: '12px 24px'
+    }}>
+      <div style={{ 
+        maxWidth: '1800px', 
+        margin: '0 auto', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '16px'
+      }}>
+        {/* Brand Logo & Tagline */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <Logo size={42} />
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="font-heading" style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                SnapOG <span style={{
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ec4899 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>Studio</span>
+              </span>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                background: isPro ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : 'rgba(245, 158, 11, 0.12)',
+                color: isPro ? '#ffffff' : '#f59e0b',
+                border: isPro ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(245, 158, 11, 0.25)',
+                letterSpacing: '0.05em'
+              }}>
+                {isPro ? 'PRO ACTIVATED' : 'v1.0 FREE'}
+              </span>
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontWeight: 600, color: '#f8fafc' }}>TinyForge</span>
+              <span>•</span>
+              <span style={{ color: 'var(--text-muted)' }}>Crafted with ❤️ by a Solo Dev</span>
+              <span>•</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#10b981' }}>
+                <Zap size={11} /> 100% Client-Side
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Presets Carousel Bar */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px', 
+          background: 'rgba(255, 255, 255, 0.03)',
+          padding: '4px 6px',
+          borderRadius: '10px',
+          border: '1px solid var(--border-subtle)',
+          overflowX: 'auto',
+          maxWidth: '520px'
+        }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-dim)', paddingLeft: '8px', textTransform: 'uppercase', fontWeight: 600 }}>
+            Presets:
+          </span>
+          {QUICK_PRESETS.map((preset, idx) => (
+            <button
+              key={idx}
+              onClick={() => onApplyPreset(preset)}
+              style={{
+                fontSize: '12px',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                whiteSpace: 'nowrap',
+                background: 'rgba(255, 255, 255, 0.04)',
+                color: 'var(--text-muted)',
+                transition: 'all 0.15s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)';
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                e.currentTarget.style.color = 'var(--text-muted)';
+              }}
+            >
+              {preset.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Right Action Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Get Meta Tags */}
+          <button
+            onClick={onOpenMeta}
+            className="btn-secondary"
+            style={{ fontSize: '13px', padding: '7px 14px' }}
+            title="Generate HTML and Next.js <meta> tags"
+          >
+            <Code2 size={15} />
+            <span>Copy Meta Tags</span>
+          </button>
+
+          {/* Buy Me a Coffee */}
+          <button
+            onClick={onOpenCoffee}
+            className="btn-secondary"
+            style={{ 
+              fontSize: '13px', 
+              padding: '7px 14px', 
+              color: '#f59e0b',
+              borderColor: 'rgba(245, 158, 11, 0.25)' 
+            }}
+            title="Support indie developer with a coffee"
+          >
+            <Coffee size={15} />
+            <span>Tip $3</span>
+          </button>
+
+          {/* PRO Pack Button */}
+          <button
+            onClick={onOpenPro}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '7px',
+              padding: '7px 16px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 700,
+              background: isPro 
+                ? 'linear-gradient(135deg, #10b981, #059669)'
+                : 'linear-gradient(135deg, #f59e0b, #ef4444)',
+              color: '#ffffff',
+              boxShadow: isPro 
+                ? '0 0 15px rgba(16, 185, 129, 0.4)'
+                : '0 0 15px rgba(245, 158, 11, 0.45)',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            {isPro ? (
+              <>
+                <CheckCircle2 size={16} />
+                <span>PRO Active</span>
+              </>
+            ) : (
+              <>
+                <Crown size={16} />
+                <span>Unlock PRO</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
