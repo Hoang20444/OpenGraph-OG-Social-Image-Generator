@@ -91,6 +91,46 @@ export const TEMPLATES = [
     author: 'TinyForge'
   },
   {
+    id: 'handcrafted-note',
+    name: 'Handcrafted Note',
+    tagline: 'Sticky paper, doodle arrow & warm handwriting',
+    badge: 'Human',
+    isPro: false,
+    author: 'TinyForge'
+  },
+  {
+    id: 'retro-paper',
+    name: 'Vintage Paper',
+    tagline: 'Aged parchment, classic serif & post stamp',
+    badge: 'Retro',
+    isPro: false,
+    author: 'TinyForge'
+  },
+  {
+    id: 'floating-3d',
+    name: '3D Floating Glass',
+    tagline: 'Perspective 3D tilt with deep layered shadows',
+    badge: '3D Depth',
+    isPro: false,
+    author: 'TinyForge'
+  },
+  {
+    id: 'safari-window',
+    name: 'Safari Browser',
+    tagline: 'Mac browser window with frosted URL pill',
+    badge: 'Clean UI',
+    isPro: false,
+    author: 'TinyForge'
+  },
+  {
+    id: 'quote-focus',
+    name: 'Wisdom Quote',
+    tagline: 'Large quotation marks & thought leadership',
+    badge: 'Viral',
+    isPro: false,
+    author: 'TinyForge'
+  },
+  {
     id: 'dev-terminal',
     name: 'Dev Terminal',
     tagline: 'MacOS code window & CLI aesthetic',
@@ -132,6 +172,14 @@ export const TEMPLATES = [
   }
 ];
 
+export const STICKERS = [
+  { id: 'none', label: 'None' },
+  { id: 'must-read', label: '⭐ MUST READ', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' },
+  { id: 'pro-tip', label: '💡 PRO TIP', color: '#10b981', bg: 'rgba(16, 185, 129, 0.2)' },
+  { id: 'trending', label: '🔥 TRENDING', color: '#f43f5e', bg: 'rgba(244, 63, 94, 0.2)' },
+  { id: 'handcrafted', label: '🎨 HANDCRAFTED', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.2)' }
+];
+
 export const QUICK_PRESETS = [
   {
     name: '🚀 SaaS Launch',
@@ -165,6 +213,39 @@ export const QUICK_PRESETS = [
     site: 'indiepulse.fm',
     template: 'bento-grid',
     theme: 'sunset-amber'
+  },
+  {
+    name: '📝 Maker Note',
+    title: 'The Solopreneur Playbook: Building Micro-SaaS from Scratch',
+    subtitle: '10 practical lessons learned after shipping 5 web apps with zero marketing budget.',
+    tag: 'HANDWRITTEN NOTE',
+    author: 'Nguyen Viet Hoang',
+    role: 'Maker @ TinyForge',
+    site: 'tinyforge.dev',
+    template: 'handcrafted-note',
+    theme: 'sunset-amber'
+  },
+  {
+    name: '📜 Vintage Essay',
+    title: 'The Lost Art of Crafting Digital Software with Patience and Soul',
+    subtitle: 'Why modern engineers are rediscovering calm, focused development over hyper-growth.',
+    tag: 'ESSAY • ISSUE NO. 14',
+    author: 'Evelyn St. Claire',
+    role: 'Author & Essayist',
+    site: 'themorningink.com',
+    template: 'retro-paper',
+    theme: 'pure-white'
+  },
+  {
+    name: '💬 Viral Quote',
+    title: '“The best code is the code you never had to maintain because you shipped what truly matters.”',
+    subtitle: 'Insights on minimalism, architectural clarity, and building lean businesses.',
+    tag: 'WORDS OF WISDOM',
+    author: 'Kira Chen',
+    role: 'Principal Architect',
+    site: 'thoughtforge.io',
+    template: 'quote-focus',
+    theme: 'indigo-cyan'
   },
   {
     name: '⭐ Open Source',

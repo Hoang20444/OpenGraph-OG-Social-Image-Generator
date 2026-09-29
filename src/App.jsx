@@ -26,7 +26,12 @@ export default function App() {
     aspectRatio: '1200x630',
     pattern: 'dots',
     fontSize: 50,
-    align: 'left'
+    align: 'left',
+    padding: 60,
+    borderRadius: 16,
+    shadowIntensity: 'medium',
+    tilt3D: false,
+    sticker: 'none'
   });
 
   // Monetization State (Persisted in localStorage)

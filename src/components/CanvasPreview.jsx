@@ -22,7 +22,7 @@ import {
   MessageCircle,
   Repeat
 } from 'lucide-react';
-import { COLOR_THEMES, ASPECT_RATIOS } from '../data/templates';
+import { COLOR_THEMES, ASPECT_RATIOS, STICKERS } from '../data/templates';
 
 const ICONS_MAP = {
   sparkles: Sparkles,
@@ -107,6 +107,17 @@ export default function CanvasPreview({
       case 'clean':
       default:
         return { background: currentTheme.bg };
+    }
+  };
+
+  const getShadowStyle = () => {
+    switch (config.shadowIntensity) {
+      case 'none': return 'none';
+      case 'soft': return '0 15px 35px -5px rgba(0, 0, 0, 0.4)';
+      case 'glow': return `0 0 50px ${currentTheme.glowColor || 'rgba(99,102,241,0.4)'}, 0 20px 40px rgba(0,0,0,0.7)`;
+      case 'medium':
+      default:
+        return '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(99, 102, 241, 0.15)';
     }
   };
 
@@ -341,17 +352,19 @@ export default function CanvasPreview({
         {/* RAW CANVAS (Default high-fidelity view) */}
         {previewPlatform === 'raw' && (
           <div 
+            className="perspective-container"
             style={{
               width: `${currentRatio.width * scale}px`,
               height: `${currentRatio.height * scale}px`,
               transition: 'width 0.2s ease, height 0.2s ease',
               position: 'relative',
-              boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(99, 102, 241, 0.15)',
-              borderRadius: '12px',
-              overflow: 'hidden'
+              boxShadow: getShadowStyle(),
+              borderRadius: `${(config.borderRadius ?? 16) * scale}px`,
+              overflow: config.tilt3D ? 'visible' : 'hidden'
             }}
           >
             <div
+              className={config.tilt3D ? 'tilt-3d' : ''}
               style={{
                 width: `${currentRatio.width}px`,
                 height: `${currentRatio.height}px`,
@@ -370,8 +383,10 @@ export default function CanvasPreview({
     </div>
   );
 
-  // Core Canvas Engine with 6 High-Fidelity Templates
+  // Core Canvas Engine with High-Fidelity Templates
   function renderActualCanvas() {
+    const activeSticker = STICKERS.find((s) => s.id === config.sticker);
+
     return (
       <div
         ref={canvasRef}
@@ -387,6 +402,28 @@ export default function CanvasPreview({
           ...getPatternStyle()
         }}
       >
+        {/* Floating Human Sticker Badge */}
+        {activeSticker && activeSticker.id !== 'none' && (
+          <div style={{
+            position: 'absolute',
+            top: '32px',
+            right: '32px',
+            zIndex: 35,
+            padding: '8px 20px',
+            borderRadius: '999px',
+            background: activeSticker.bg,
+            color: activeSticker.color,
+            border: `2px solid ${activeSticker.color}`,
+            boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+            fontWeight: 800,
+            fontSize: '15px',
+            letterSpacing: '0.06em',
+            transform: 'rotate(6deg)'
+          }}>
+            {activeSticker.label}
+          </div>
+        )}
+
         {/* TEMPLATE 1: SAAS LAUNCHPAD */}
         {config.templateId === 'saas-launch' && (
           <div style={{
@@ -1085,6 +1122,581 @@ export default function CanvasPreview({
 
               <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '13px' }}>
                 SECTOR // 2026.09.29
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TEMPLATE 7: HANDCRAFTED NOTE */}
+        {config.templateId === 'handcrafted-note' && (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            padding: `${config.padding || 60}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxSizing: 'border-box',
+            position: 'relative'
+          }}>
+            {/* The Floating Notepad Card */}
+            <div style={{
+              width: '100%',
+              height: '100%',
+              background: currentTheme.id === 'pure-white' ? '#fffdf7' : 'rgba(25, 29, 41, 0.95)',
+              borderRadius: `${config.borderRadius ?? 20}px`,
+              border: `1.5px dashed ${currentTheme.border}`,
+              padding: '48px 60px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.5)'
+            }}>
+              {/* Washi Tape at Top Center */}
+              <div style={{
+                position: 'absolute',
+                top: '-14px',
+                left: '50%',
+                transform: 'translateX(-50%) rotate(-1deg)',
+                width: '140px',
+                height: '30px',
+                background: 'rgba(254, 240, 138, 0.8)',
+                backdropFilter: 'blur(4px)',
+                borderRadius: '3px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                borderLeft: '2px dashed rgba(0,0,0,0.2)',
+                borderRight: '2px dashed rgba(0,0,0,0.2)',
+                zIndex: 10
+              }} />
+
+              {/* Top Tag & Domain */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="font-handwriting" style={{
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  color: currentTheme.primary,
+                  transform: 'rotate(-2deg)'
+                }}>
+                  ✏️ {config.categoryTag}
+                </span>
+
+                <span style={{
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-mono)',
+                  color: 'rgba(255,255,255,0.5)',
+                  background: 'rgba(255,255,255,0.06)',
+                  padding: '4px 12px',
+                  borderRadius: '6px'
+                }}>
+                  {config.siteUrl}
+                </span>
+              </div>
+
+              {/* Main Headline with Marker Underline and Hand-drawn Arrow */}
+              <div style={{ textAlign: config.align, position: 'relative' }}>
+                <h1 className="font-heading" style={{
+                  fontSize: `${config.fontSize * 0.96}px`,
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  lineHeight: 1.22,
+                  marginBottom: '16px'
+                }}>
+                  {config.title}
+                </h1>
+
+                {/* Hand-drawn SVG highlighter / swoosh underline */}
+                <svg width="220" height="16" viewBox="0 0 220 16" fill="none" style={{
+                  display: 'block',
+                  margin: config.align === 'center' ? '0 auto 16px' : '0 0 16px',
+                  opacity: 0.85
+                }}>
+                  <path d="M4 12C50 4 140 3 216 11" stroke={currentTheme.secondary} strokeWidth="5" strokeLinecap="round" />
+                </svg>
+
+                <p className="font-handwriting" style={{
+                  fontSize: '32px',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  lineHeight: 1.35,
+                  maxWidth: '920px',
+                  margin: config.align === 'center' ? '0 auto' : '0'
+                }}>
+                  {config.subtitle}
+                </p>
+              </div>
+
+              {/* Bottom Author Row with Stamp */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed rgba(255,255,255,0.12)', paddingTop: '18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <img
+                    src={config.avatarUrl}
+                    alt={config.authorName}
+                    style={{ width: '46px', height: '46px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${currentTheme.primary}` }}
+                  />
+                  <div>
+                    <div className="font-handwriting" style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff', lineHeight: 1.1 }}>
+                      Handcrafted by {config.authorName}
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
+                      {config.authorRole}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vintage Circular Stamp */}
+                <div style={{
+                  width: '68px',
+                  height: '68px',
+                  borderRadius: '50%',
+                  border: `2px dashed ${currentTheme.primary}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'column',
+                  transform: 'rotate(12deg)',
+                  opacity: 0.85
+                }}>
+                  <span style={{ fontSize: '8px', fontWeight: 800, textTransform: 'uppercase', color: currentTheme.primary }}>TINYFORGE</span>
+                  <span style={{ fontSize: '14px' }}>★</span>
+                  <span style={{ fontSize: '7px', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>MAKER NOTE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TEMPLATE 8: RETRO VINTAGE PAPER */}
+        {config.templateId === 'retro-paper' && (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            padding: `${config.padding || 60}px`,
+            background: '#181512',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxSizing: 'border-box',
+            position: 'relative'
+          }}>
+            {/* Inset Double Border */}
+            <div style={{
+              width: '100%',
+              height: '100%',
+              border: '2px solid #d4af37',
+              borderRadius: `${config.borderRadius ?? 8}px`,
+              padding: '10px',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                border: '1px solid rgba(212, 175, 55, 0.4)',
+                padding: '40px 50px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxSizing: 'border-box',
+                background: 'radial-gradient(ellipse at center, rgba(35, 29, 24, 0.9) 0%, rgba(20, 16, 13, 0.98) 100%)'
+              }}>
+                {/* Vintage Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(212, 175, 55, 0.3)', paddingBottom: '16px' }}>
+                  <div className="font-serif" style={{ fontSize: '15px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#d4af37' }}>
+                    ✦ THE TINYFORGE GAZETTE ✦
+                  </div>
+                  <div style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.5)' }}>
+                    EST. 2026 • {config.categoryTag}
+                  </div>
+                </div>
+
+                {/* Classic Editorial Headline */}
+                <div style={{ textAlign: config.align, margin: 'auto 0' }}>
+                  <h1 className="font-serif" style={{
+                    fontSize: `${config.fontSize * 1.08}px`,
+                    fontWeight: 700,
+                    color: '#fdfbf7',
+                    lineHeight: 1.15,
+                    fontStyle: 'normal',
+                    marginBottom: '18px'
+                  }}>
+                    {config.title}
+                  </h1>
+                  <p className="font-serif" style={{
+                    fontSize: '24px',
+                    color: 'rgba(253, 251, 247, 0.72)',
+                    lineHeight: 1.45,
+                    fontStyle: 'italic',
+                    maxWidth: '920px',
+                    margin: config.align === 'center' ? '0 auto' : '0'
+                  }}>
+                    {config.subtitle}
+                  </p>
+                </div>
+
+                {/* Footer With Postal Stamp & Byline */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(212, 175, 55, 0.3)', paddingTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <img
+                      src={config.avatarUrl}
+                      alt={config.authorName}
+                      style={{ width: '44px', height: '44px', borderRadius: '4px', objectFit: 'cover', filter: 'sepia(30%)', border: '1px solid #d4af37' }}
+                    />
+                    <div>
+                      <span className="font-serif" style={{ fontSize: '18px', fontWeight: 600, color: '#fdfbf7' }}>
+                        Dispatches by {config.authorName}
+                      </span>
+                      <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', display: 'block' }}>
+                        {config.authorRole} • Published at {config.siteUrl}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Postal Cancellation Stamp */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.75 }}>
+                    <div style={{ width: '42px', height: '52px', border: '2px solid #d4af37', borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '18px' }}>🦅</span>
+                      <span style={{ fontSize: '8px', color: '#d4af37' }}>AIR MAIL</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ width: '40px', height: '2px', background: '#d4af37' }} />
+                      <div style={{ width: '40px', height: '2px', background: '#d4af37' }} />
+                      <div style={{ width: '40px', height: '2px', background: '#d4af37' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TEMPLATE 9: 3D FLOATING GLASS */}
+        {config.templateId === 'floating-3d' && (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            padding: `${config.padding || 60}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxSizing: 'border-box',
+            perspective: '1200px'
+          }}>
+            <div style={{
+              width: '100%',
+              height: '100%',
+              background: 'rgba(15, 23, 42, 0.75)',
+              backdropFilter: 'blur(25px)',
+              borderRadius: `${config.borderRadius ?? 24}px`,
+              border: `1.5px solid ${currentTheme.border}`,
+              padding: '50px 70px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: `0 35px 70px -15px rgba(0,0,0,0.8), 0 0 50px ${currentTheme.glowColor}`,
+              transform: 'rotateX(2deg) rotateY(-3deg)',
+              position: 'relative'
+            }}>
+              {/* Top floating pill */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{
+                  padding: '8px 20px',
+                  borderRadius: '999px',
+                  background: currentTheme.gradient,
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  fontSize: '15px',
+                  boxShadow: `0 8px 20px ${currentTheme.glowColor}`
+                }}>
+                  {config.categoryTag}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '16px', fontWeight: 600 }}>
+                  <BrandIcon size={20} color={currentTheme.secondary} />
+                  <span>{config.siteUrl}</span>
+                </div>
+              </div>
+
+              {/* Floating Headline */}
+              <div style={{ textAlign: config.align }}>
+                <h1 className="font-heading" style={{
+                  fontSize: `${config.fontSize * 1.02}px`,
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  lineHeight: 1.16,
+                  letterSpacing: '-0.03em',
+                  marginBottom: '18px'
+                }}>
+                  {config.title}
+                </h1>
+                <p style={{
+                  fontSize: '24px',
+                  color: 'rgba(255, 255, 255, 0.75)',
+                  lineHeight: 1.45,
+                  maxWidth: '920px',
+                  margin: config.align === 'center' ? '0 auto' : '0'
+                }}>
+                  {config.subtitle}
+                </p>
+              </div>
+
+              {/* Author Capsule */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  padding: '8px 20px',
+                  borderRadius: '999px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <img
+                    src={config.avatarUrl}
+                    alt={config.authorName}
+                    style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '16px', color: '#ffffff' }}>{config.authorName}</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{config.authorRole}</div>
+                  </div>
+                </div>
+
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: currentTheme.secondary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <Zap size={16} />
+                  <span>ELEVATED EXPERIENCE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TEMPLATE 10: SAFARI BROWSER FRAME */}
+        {config.templateId === 'safari-window' && (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            padding: `${config.padding || 50}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{
+              width: '100%',
+              height: '100%',
+              background: 'rgba(15, 23, 42, 0.92)',
+              borderRadius: `${config.borderRadius ?? 20}px`,
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 30px 60px rgba(0,0,0,0.8)'
+            }}>
+              {/* Safari Chrome Title Bar */}
+              <div style={{
+                height: '56px',
+                background: 'rgba(30, 41, 59, 0.7)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                padding: '0 24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '13px', height: '13px', borderRadius: '50%', background: '#ef4444' }} />
+                  <div style={{ width: '13px', height: '13px', borderRadius: '50%', background: '#f59e0b' }} />
+                  <div style={{ width: '13px', height: '13px', borderRadius: '50%', background: '#10b981' }} />
+                </div>
+
+                {/* Frosted URL Bar */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(0, 0, 0, 0.35)',
+                  padding: '6px 24px',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}>
+                  <span style={{ color: '#10b981' }}>🔒</span>
+                  <span>https://{config.siteUrl}/posts/{config.title.toLowerCase().slice(0, 20).replace(/\s+/g, '-')}</span>
+                </div>
+
+                <div style={{ width: '50px' }} />
+              </div>
+
+              {/* Inside Page Content */}
+              <div style={{
+                flex: 1,
+                padding: '40px 60px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                textAlign: config.align
+              }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  background: currentTheme.gradient,
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  width: 'fit-content',
+                  margin: config.align === 'center' ? '0 auto' : '0'
+                }}>
+                  {config.categoryTag}
+                </div>
+
+                <div>
+                  <h1 className="font-heading" style={{
+                    fontSize: `${config.fontSize * 0.98}px`,
+                    fontWeight: 800,
+                    color: '#ffffff',
+                    lineHeight: 1.2,
+                    marginBottom: '16px'
+                  }}>
+                    {config.title}
+                  </h1>
+                  <p style={{
+                    fontSize: '22px',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    lineHeight: 1.45,
+                    maxWidth: '900px',
+                    margin: config.align === 'center' ? '0 auto' : '0'
+                  }}>
+                    {config.subtitle}
+                  </p>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: config.align === 'center' ? 'center' : 'space-between',
+                  borderTop: '1px solid rgba(255,255,255,0.08)',
+                  paddingTop: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img
+                      src={config.avatarUrl}
+                      alt={config.authorName}
+                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '15px', color: '#ffffff' }}>{config.authorName}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{config.authorRole}</div>
+                    </div>
+                  </div>
+
+                  {config.align !== 'center' && (
+                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono)' }}>
+                      TinyForge Engine 2.0
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TEMPLATE 11: THOUGHT LEADERSHIP QUOTE */}
+        {config.templateId === 'quote-focus' && (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            padding: `${config.padding || 70}px 90px`,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxSizing: 'border-box',
+            position: 'relative'
+          }}>
+            {/* Giant Watermark Quote Mark */}
+            <div className="font-serif" style={{
+              position: 'absolute',
+              top: '20px',
+              left: '50px',
+              fontSize: '180px',
+              lineHeight: 1,
+              color: currentTheme.primary,
+              opacity: 0.18,
+              pointerEvents: 'none',
+              fontFamily: 'var(--font-serif)'
+            }}>
+              “
+            </div>
+
+            {/* Top Category Tag */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 2 }}>
+              <span style={{
+                fontSize: '14px',
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: currentTheme.primary
+              }}>
+                ✦ {config.categoryTag} ✦
+              </span>
+              <span style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>
+                {config.siteUrl}
+              </span>
+            </div>
+
+            {/* Central Wisdom Quote Text */}
+            <div style={{ textAlign: 'center', zIndex: 2, padding: '0 40px' }}>
+              <h1 className="font-serif" style={{
+                fontSize: `${config.fontSize * 1.05}px`,
+                fontWeight: 600,
+                color: '#ffffff',
+                lineHeight: 1.25,
+                fontStyle: 'italic',
+                marginBottom: '20px'
+              }}>
+                {config.title}
+              </h1>
+              <p style={{
+                fontSize: '22px',
+                color: 'rgba(255, 255, 255, 0.72)',
+                lineHeight: 1.45,
+                maxWidth: '850px',
+                margin: '0 auto'
+              }}>
+                {config.subtitle}
+              </p>
+            </div>
+
+            {/* Centered Author Persona with Verified Badge */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', zIndex: 2 }}>
+              <img
+                src={config.avatarUrl}
+                alt={config.authorName}
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: `3px solid ${currentTheme.primary}`,
+                  boxShadow: `0 0 25px ${currentTheme.glowColor}`
+                }}
+              />
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>
+                  {config.authorName}
+                </div>
+                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  {config.authorRole}
+                </div>
               </div>
             </div>
           </div>

@@ -18,13 +18,17 @@ import {
   Layers, 
   Cpu,
   Ratio,
-  Maximize2
+  Maximize2,
+  Box,
+  Sliders,
+  Tag
 } from 'lucide-react';
 import { 
   TEMPLATES, 
   COLOR_THEMES, 
   ASPECT_RATIOS, 
-  DEFAULT_AVATARS 
+  DEFAULT_AVATARS,
+  STICKERS
 } from '../data/templates';
 
 const BRAND_ICONS = [
@@ -578,6 +582,132 @@ export default function Sidebar({
                       }}
                     >
                       {align} Align
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3D Perspective Tilt Toggle */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="input-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Box size={14} color="var(--color-primary)" /> 3D Perspective Tilt
+                </label>
+                <button
+                  onClick={() => onChange({ ...config, tilt3D: !config.tilt3D })}
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '3px 10px',
+                    borderRadius: '999px',
+                    background: config.tilt3D ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.08)',
+                    color: '#ffffff',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {config.tilt3D ? 'ON (Active)' : 'OFF'}
+                </button>
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                Tạo góc nghiêng 3D không gian cho thẻ bài, tạo chiều sâu thị giác chân thực.
+              </p>
+            </div>
+
+            {/* Stickers / Human Badges */}
+            <div>
+              <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Tag size={14} color="#f59e0b" /> Human Sticker Badge
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {STICKERS.map((stk) => {
+                  const isSelected = (config.sticker || 'none') === stk.id;
+                  return (
+                    <button
+                      key={stk.id}
+                      onClick={() => onChange({ ...config, sticker: stk.id })}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        background: isSelected ? (stk.bg || 'rgba(99, 102, 241, 0.25)') : 'rgba(255, 255, 255, 0.03)',
+                        color: isSelected ? (stk.color || '#ffffff') : 'var(--text-dim)',
+                        border: isSelected ? `1px solid ${stk.color || 'var(--color-primary)'}` : '1px solid var(--border-subtle)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {stk.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Card Border Radius Slider */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="input-label" style={{ margin: 0 }}>Border Radius (Bo góc)</label>
+                <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+                  {config.borderRadius ?? 16}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="36"
+                step="2"
+                value={config.borderRadius ?? 16}
+                onChange={(e) => onChange({ ...config, borderRadius: Number(e.target.value) })}
+                style={{ width: '100%', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+              />
+            </div>
+
+            {/* Canvas Inner Padding Slider */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="input-label" style={{ margin: 0 }}>Inner Padding (Đệm lề)</label>
+                <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+                  {config.padding ?? 60}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="30"
+                max="100"
+                step="5"
+                value={config.padding ?? 60}
+                onChange={(e) => onChange({ ...config, padding: Number(e.target.value) })}
+                style={{ width: '100%', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+              />
+            </div>
+
+            {/* Shadow Depth Selector */}
+            <div>
+              <label className="input-label">Shadow Depth (Bóng đổ)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                {[
+                  { id: 'none', label: 'None' },
+                  { id: 'soft', label: 'Soft' },
+                  { id: 'medium', label: 'Deep' },
+                  { id: 'glow', label: 'Glow' }
+                ].map((sh) => {
+                  const isSelected = (config.shadowIntensity || 'medium') === sh.id;
+                  return (
+                    <button
+                      key={sh.id}
+                      onClick={() => onChange({ ...config, shadowIntensity: sh.id })}
+                      style={{
+                        padding: '6px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        background: isSelected ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                        color: isSelected ? '#ffffff' : 'var(--text-dim)',
+                        border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--border-subtle)'
+                      }}
+                    >
+                      {sh.label}
                     </button>
                   );
                 })}
