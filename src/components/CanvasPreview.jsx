@@ -20,9 +20,13 @@ import {
   Bookmark,
   Heart,
   MessageCircle,
-  Repeat
+  Repeat,
+  LayoutGrid,
+  Download,
+  CheckCircle2
 } from 'lucide-react';
-import { COLOR_THEMES, ASPECT_RATIOS, STICKERS } from '../data/templates';
+import { toPng } from 'html-to-image';
+import { COLOR_THEMES, ASPECT_RATIOS, STICKERS, TEMPLATES } from '../data/templates';
 
 const ICONS_MAP = {
   sparkles: Sparkles,
@@ -40,11 +44,16 @@ const ICONS_MAP = {
 export default function CanvasPreview({
   config,
   canvasRef,
-  isPro
+  isPro,
+  viewMode = 'single',
+  onToggleViewMode,
+  onSelectTemplate,
+  onNotify
 }) {
   const [zoom, setZoom] = useState('fit'); // 'fit' | 0.5 | 0.75 | 1.0
   const [scale, setScale] = useState(0.6);
   const [previewPlatform, setPreviewPlatform] = useState('raw'); // 'raw' | 'twitter' | 'facebook'
+  const [galleryCategory, setGalleryCategory] = useState('all');
   const containerRef = useRef(null);
 
   const currentTheme = COLOR_THEMES.find((t) => t.id === config.themeId) || COLOR_THEMES[0];
@@ -121,6 +130,38 @@ export default function CanvasPreview({
     }
   };
 
+  const handleQuickCardExport = async (e, tplId, tplName) => {
+    e.stopPropagation();
+    const elem = document.getElementById(`gallery-canvas-${tplId}`);
+    if (!elem) return;
+    try {
+      if (onNotify) onNotify(`⏳ Đang xuất ảnh retina cho mẫu "${tplName}"...`);
+      const dataUrl = await toPng(elem, {
+        quality: 0.98,
+        pixelRatio: 2,
+        cacheBust: true
+      });
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `snapog-${tplId}-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      if (onNotify) onNotify(`✅ Đã tải ảnh mẫu "${tplName}" thành công!`);
+    } catch (err) {
+      console.error(err);
+      if (onNotify) onNotify('❌ Lỗi khi xuất ảnh');
+    }
+  };
+
+  const filteredTemplates = TEMPLATES.filter((tpl) => {
+    if (galleryCategory === 'all') return true;
+    if (galleryCategory === 'human') return ['handcrafted-note', 'retro-paper', 'quote-focus'].includes(tpl.id);
+    if (galleryCategory === 'tech') return ['dev-terminal', 'floating-3d', 'safari-window', 'bento-grid', 'cyber-glitch'].includes(tpl.id);
+    if (galleryCategory === 'editorial') return ['clean-editorial', 'saas-launch', 'podcast-media'].includes(tpl.id);
+    return true;
+  });
+
   return (
     <div 
       ref={containerRef}
@@ -136,40 +177,134 @@ export default function CanvasPreview({
     >
       {/* Top Preview Controls Bar */}
       <div style={{
-        padding: '12px 24px',
+        padding: '10px 24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: '1px solid var(--border-subtle)',
-        background: 'rgba(0, 0, 0, 0.3)',
-        zIndex: 10
+        background: 'rgba(0, 0, 0, 0.35)',
+        zIndex: 10,
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
-        {/* Platform simulation tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {[
-            { id: 'raw', label: 'Raw Canvas' },
-            { id: 'twitter', label: 'Twitter / X Card' },
-            { id: 'facebook', label: 'LinkedIn / Facebook Feed' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setPreviewPlatform(item.id)}
-              style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: previewPlatform === item.id ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.04)',
-                color: previewPlatform === item.id ? '#ffffff' : 'var(--text-muted)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
+        {/* Left: View Switcher */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          background: 'rgba(255, 255, 255, 0.04)',
+          padding: '3px',
+          borderRadius: '8px',
+          border: '1px solid var(--border-subtle)'
+        }}>
+          <button
+            type="button"
+            onClick={() => onToggleViewMode('single')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '12px',
+              fontWeight: 700,
+              padding: '6px 12px',
+              borderRadius: '6px',
+              background: viewMode === 'single' ? 'var(--color-primary)' : 'transparent',
+              color: viewMode === 'single' ? '#ffffff' : 'var(--text-muted)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Eye size={14} />
+            <span>Single Canvas</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggleViewMode('gallery')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '12px',
+              fontWeight: 700,
+              padding: '6px 12px',
+              borderRadius: '6px',
+              background: viewMode === 'gallery' ? 'linear-gradient(135deg, #10b981, #06b6d4)' : 'transparent',
+              color: viewMode === 'gallery' ? '#ffffff' : 'var(--text-muted)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <LayoutGrid size={14} />
+            <span>Instant Gallery</span>
+            <span style={{
+              fontSize: '9px',
+              fontWeight: 800,
+              padding: '1px 5px',
+              borderRadius: '999px',
+              background: viewMode === 'gallery' ? '#ffffff' : 'rgba(16, 185, 129, 0.25)',
+              color: viewMode === 'gallery' ? '#0f172a' : '#34d399'
+            }}>
+              11 LIVE
+            </span>
+          </button>
         </div>
 
-        {/* Zoom Controls & Dimension readout */}
+        {/* Center: Platform (Single) or Category Filters (Gallery) */}
+        {viewMode === 'single' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {[
+              { id: 'raw', label: 'Raw Canvas' },
+              { id: 'twitter', label: 'Twitter / X Card' },
+              { id: 'facebook', label: 'LinkedIn / Facebook Feed' }
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setPreviewPlatform(item.id)}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  background: previewPlatform === item.id ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.04)',
+                  color: previewPlatform === item.id ? '#ffffff' : 'var(--text-muted)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {[
+              { id: 'all', label: 'All (11)' },
+              { id: 'human', label: '✍️ Human Craft (3)' },
+              { id: 'tech', label: '⚡ 3D & Tech (5)' },
+              { id: 'editorial', label: '📰 Editorial (3)' }
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setGalleryCategory(cat.id)}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  background: galleryCategory === cat.id ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.03)',
+                  color: galleryCategory === cat.id ? '#ffffff' : 'var(--text-dim)',
+                  border: galleryCategory === cat.id ? '1px solid var(--color-primary)' : '1px solid transparent',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Right: Dimension & Zoom Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ 
             fontFamily: 'var(--font-mono)', 
@@ -179,68 +314,221 @@ export default function CanvasPreview({
             padding: '4px 8px',
             borderRadius: '4px'
           }}>
-            {currentRatio.width} × {currentRatio.height} px • {(scale * 100).toFixed(0)}%
+            {currentRatio.width} × {currentRatio.height} px {viewMode === 'single' ? `• ${(scale * 100).toFixed(0)}%` : ''}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <button
-              onClick={() => setZoom('fit')}
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '5px 8px',
-                borderRadius: '4px',
-                background: zoom === 'fit' ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                color: zoom === 'fit' ? '#ffffff' : 'var(--text-muted)'
-              }}
-            >
-              Fit
-            </button>
-            <button
-              onClick={() => setZoom(0.5)}
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '5px 8px',
-                borderRadius: '4px',
-                background: zoom === 0.5 ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                color: zoom === 0.5 ? '#ffffff' : 'var(--text-muted)'
-              }}
-            >
-              50%
-            </button>
-            <button
-              onClick={() => setZoom(0.75)}
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '5px 8px',
-                borderRadius: '4px',
-                background: zoom === 0.75 ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                color: zoom === 0.75 ? '#ffffff' : 'var(--text-muted)'
-              }}
-            >
-              75%
-            </button>
-          </div>
+          {viewMode === 'single' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <button
+                onClick={() => setZoom('fit')}
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '5px 8px',
+                  borderRadius: '4px',
+                  background: zoom === 'fit' ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                  color: zoom === 'fit' ? '#ffffff' : 'var(--text-muted)'
+                }}
+              >
+                Fit
+              </button>
+              <button
+                onClick={() => setZoom(0.5)}
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '5px 8px',
+                  borderRadius: '4px',
+                  background: zoom === 0.5 ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                  color: zoom === 0.5 ? '#ffffff' : 'var(--text-muted)'
+                }}
+              >
+                50%
+              </button>
+              <button
+                onClick={() => setZoom(0.75)}
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '5px 8px',
+                  borderRadius: '4px',
+                  background: zoom === 0.75 ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                  color: zoom === 0.75 ? '#ffffff' : 'var(--text-muted)'
+                }}
+              >
+                75%
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Main Canvas Viewport Area */}
+      {/* Main Viewport Area */}
       <div 
         className="dot-bg"
         style={{
           flex: 1,
           overflow: 'auto',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: viewMode === 'gallery' ? 'flex-start' : 'center',
           justifyContent: 'center',
-          padding: '40px',
+          padding: viewMode === 'gallery' ? '30px 40px' : '40px',
           position: 'relative'
         }}
       >
-        {/* PLATFORM SHELL: TWITTER/X CARD SIMULATOR */}
-        {previewPlatform === 'twitter' && (
+        {/* VIEW MODE 1: INSTANT GALLERY GRID */}
+        {viewMode === 'gallery' && (
+          <div style={{ width: '100%', maxWidth: '1600px', margin: '0 auto' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '24px',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>⚡ Instant Multi-Style Gallery</span>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '3px 8px',
+                    borderRadius: '999px',
+                    background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+                    color: '#ffffff'
+                  }}>
+                    {filteredTemplates.length} Styles Live
+                  </span>
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '3px' }}>
+                  Tiêu đề và nội dung của bạn đang được áp dụng trực tiếp lên toàn bộ các mẫu. Bấm vào ảnh để chỉnh sửa sâu hoặc tải về ngay!
+                </p>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(440px, 1fr))',
+              gap: '24px'
+            }}>
+              {filteredTemplates.map((tpl) => {
+                const isCurrent = config.templateId === tpl.id;
+                const cardScale = 440 / currentRatio.width;
+                const cardHeight = currentRatio.height * cardScale;
+
+                return (
+                  <div
+                    key={tpl.id}
+                    className="glass-card"
+                    style={{
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      border: isCurrent ? '2px solid var(--color-primary)' : '1px solid var(--border-subtle)',
+                      background: 'rgba(15, 23, 42, 0.65)',
+                      boxShadow: isCurrent ? '0 0 25px rgba(99, 102, 241, 0.35)' : '0 10px 30px rgba(0, 0, 0, 0.4)',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    {/* Live Preview Container */}
+                    <div
+                      style={{
+                        width: '100%',
+                        height: `${cardHeight}px`,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        background: '#030712'
+                      }}
+                      onClick={() => {
+                        onSelectTemplate(tpl.id);
+                        onToggleViewMode('single');
+                      }}
+                      title="Bấm để chỉnh sửa chi tiết mẫu này trong Single Canvas"
+                    >
+                      <div style={{
+                        width: `${currentRatio.width}px`,
+                        height: `${currentRatio.height}px`,
+                        transform: `scale(${cardScale})`,
+                        transformOrigin: 'top left',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        pointerEvents: 'none'
+                      }}>
+                        {renderActualCanvas(tpl.id, false)}
+                      </div>
+                    </div>
+
+                    {/* Card Meta & Actions */}
+                    <div style={{
+                      padding: '14px 18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                      background: 'rgba(255, 255, 255, 0.02)'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff' }}>
+                            {tpl.name}
+                          </span>
+                          <span style={{
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            color: 'var(--text-muted)'
+                          }}>
+                            {tpl.badge}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                          {tpl.tagline}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSelectTemplate(tpl.id);
+                            onToggleViewMode('single');
+                          }}
+                          className={isCurrent ? 'btn-primary' : 'btn-secondary'}
+                          style={{ fontSize: '12px', padding: '6px 12px' }}
+                        >
+                          {isCurrent ? 'Đang chọn' : 'Chọn mẫu'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleQuickCardExport(e, tpl.id, tpl.name)}
+                          className="btn-secondary"
+                          style={{
+                            fontSize: '12px',
+                            padding: '6px 10px',
+                            color: '#10b981',
+                            borderColor: 'rgba(16, 185, 129, 0.3)'
+                          }}
+                          title="Tải ảnh PNG mẫu này ngay"
+                        >
+                          <Download size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW MODE 2: SINGLE CANVAS PLATFORM SIMULATOR */}
+        {viewMode === 'single' && previewPlatform === 'twitter' && (
           <div style={{
             maxWidth: '680px',
             width: '100%',
@@ -302,7 +590,7 @@ export default function CanvasPreview({
         )}
 
         {/* PLATFORM SHELL: LINKEDIN / FACEBOOK FEED SIMULATOR */}
-        {previewPlatform === 'facebook' && (
+        {viewMode === 'single' && previewPlatform === 'facebook' && (
           <div style={{
             maxWidth: '650px',
             width: '100%',
@@ -350,7 +638,7 @@ export default function CanvasPreview({
         )}
 
         {/* RAW CANVAS (Default high-fidelity view) */}
-        {previewPlatform === 'raw' && (
+        {viewMode === 'single' && previewPlatform === 'raw' && (
           <div 
             className="perspective-container"
             style={{
@@ -384,13 +672,14 @@ export default function CanvasPreview({
   );
 
   // Core Canvas Engine with High-Fidelity Templates
-  function renderActualCanvas() {
+  function renderActualCanvas(templateIdOverride = null, isExportElement = true) {
+    const activeTemplateId = templateIdOverride || config.templateId;
     const activeSticker = STICKERS.find((s) => s.id === config.sticker);
 
     return (
       <div
-        ref={canvasRef}
-        id="og-canvas-export"
+        ref={isExportElement ? canvasRef : null}
+        id={isExportElement ? 'og-canvas-export' : `gallery-canvas-${templateIdOverride}`}
         style={{
           width: `${currentRatio.width}px`,
           height: `${currentRatio.height}px`,
@@ -425,7 +714,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 1: SAAS LAUNCHPAD */}
-        {config.templateId === 'saas-launch' && (
+        {activeTemplateId === 'saas-launch' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -575,7 +864,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 2: DEV TERMINAL / CODECRAFT */}
-        {config.templateId === 'dev-terminal' && (
+        {activeTemplateId === 'dev-terminal' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -692,7 +981,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 3: LINEAR BENTO GRID */}
-        {config.templateId === 'bento-grid' && (
+        {activeTemplateId === 'bento-grid' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -819,7 +1108,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 4: CLEAN EDITORIAL */}
-        {config.templateId === 'clean-editorial' && (
+        {activeTemplateId === 'clean-editorial' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -913,7 +1202,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 5: PODCAST & STREAM (PRO) */}
-        {config.templateId === 'podcast-media' && (
+        {activeTemplateId === 'podcast-media' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -1017,7 +1306,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 6: CYBERPUNK HUD (PRO) */}
-        {config.templateId === 'cyber-glitch' && (
+        {activeTemplateId === 'cyber-glitch' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -1128,7 +1417,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 7: HANDCRAFTED NOTE */}
-        {config.templateId === 'handcrafted-note' && (
+        {activeTemplateId === 'handcrafted-note' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -1267,7 +1556,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 8: RETRO VINTAGE PAPER */}
-        {config.templateId === 'retro-paper' && (
+        {activeTemplateId === 'retro-paper' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -1370,7 +1659,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 9: 3D FLOATING GLASS */}
-        {config.templateId === 'floating-3d' && (
+        {activeTemplateId === 'floating-3d' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -1477,7 +1766,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 10: SAFARI BROWSER FRAME */}
-        {config.templateId === 'safari-window' && (
+        {activeTemplateId === 'safari-window' && (
           <div style={{
             width: '100%',
             height: '100%',
@@ -1611,7 +1900,7 @@ export default function CanvasPreview({
         )}
 
         {/* TEMPLATE 11: THOUGHT LEADERSHIP QUOTE */}
-        {config.templateId === 'quote-focus' && (
+        {activeTemplateId === 'quote-focus' && (
           <div style={{
             width: '100%',
             height: '100%',

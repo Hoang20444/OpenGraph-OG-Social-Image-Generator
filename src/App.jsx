@@ -6,7 +6,10 @@ import ExportToolbar from './components/ExportToolbar';
 import ProModal from './components/ProModal';
 import CoffeeModal from './components/CoffeeModal';
 import MetaTagsModal from './components/MetaTagsModal';
+import BatchExportModal from './components/BatchExportModal';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { COLOR_THEMES } from './data/templates';
+import { encodeConfigToUrl, decodeConfigFromUrl } from './utils/magicFetcher';
 
 export default function App() {
   const canvasRef = useRef(null);
@@ -34,6 +37,9 @@ export default function App() {
     sticker: 'none'
   });
 
+  // View Mode: 'single' (Canvas) vs 'gallery' (Instant Grid of 11 Templates)
+  const [viewMode, setViewMode] = useState('single');
+
   // Monetization State (Persisted in localStorage)
   const [isPro, setIsPro] = useState(() => {
     return localStorage.getItem('snapog_pro') === 'true';
@@ -43,6 +49,7 @@ export default function App() {
   const [isProOpen, setIsProOpen] = useState(false);
   const [isCoffeeOpen, setIsCoffeeOpen] = useState(false);
   const [isMetaOpen, setIsMetaOpen] = useState(false);
+  const [isBatchOpen, setIsBatchOpen] = useState(false);
 
   // Toast Notification System
   const [toasts, setToasts] = useState([]);
@@ -54,6 +61,15 @@ export default function App() {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3500);
   };
+
+  // Decode configuration from URL search params on mount
+  useEffect(() => {
+    const sharedConfig = decodeConfigFromUrl();
+    if (sharedConfig) {
+      setConfig((prev) => ({ ...prev, ...sharedConfig }));
+      addNotification('🔗 Đã tải mẫu thiết kế từ liên kết chia sẻ!');
+    }
+  }, []);
 
   const handleActivatePro = () => {
     setIsPro(true);
@@ -75,12 +91,40 @@ export default function App() {
     addNotification(`✨ Applied preset: ${preset.name}`);
   };
 
+  // Shuffle Magic Color Palette
+  const handleShufflePalette = () => {
+    const availableThemes = COLOR_THEMES.filter((t) => t.id !== config.themeId);
+    const randomTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
+    if (randomTheme) {
+      setConfig((prev) => ({ ...prev, themeId: randomTheme.id }));
+      addNotification(`🎲 Đã chuyển sang bảng màu: ${randomTheme.name}`);
+    }
+  };
+
+  // Share Design via URL link
+  const handleShareDesign = () => {
+    const shareUrl = encodeConfigToUrl(config);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        window.history.replaceState(null, '', shareUrl);
+        addNotification('🔗 Đã sao chép link chia sẻ thiết kế vào clipboard!');
+      });
+    } else {
+      addNotification(`🔗 Link: ${shareUrl}`);
+    }
+  };
+
+  // Select Template from Gallery
+  const handleSelectTemplate = (templateId) => {
+    setConfig((prev) => ({ ...prev, templateId }));
+    addNotification(`🎨 Đã chọn mẫu: ${templateId}`);
+  };
+
   // Keyboard shortcut listener (Ctrl + S to trigger export)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
-        // Trigger export via synthetic click or notification
         const exportBtn = document.querySelector('.btn-emerald');
         if (exportBtn) exportBtn.click();
       }
@@ -97,6 +141,8 @@ export default function App() {
         onOpenPro={() => setIsProOpen(true)}
         onOpenCoffee={() => setIsCoffeeOpen(true)}
         onOpenMeta={() => setIsMetaOpen(true)}
+        onShareDesign={handleShareDesign}
+        onOpenBatch={() => setIsBatchOpen(true)}
         isPro={isPro}
       />
 
@@ -108,6 +154,8 @@ export default function App() {
           onChange={setConfig}
           onOpenPro={() => setIsProOpen(true)}
           isPro={isPro}
+          onShufflePalette={handleShufflePalette}
+          onNotify={addNotification}
         />
 
         {/* Center / Right Canvas Area */}
@@ -115,6 +163,10 @@ export default function App() {
           config={config}
           canvasRef={canvasRef}
           isPro={isPro}
+          viewMode={viewMode}
+          onToggleViewMode={setViewMode}
+          onSelectTemplate={handleSelectTemplate}
+          onNotify={addNotification}
         />
       </div>
 
@@ -144,6 +196,13 @@ export default function App() {
       <MetaTagsModal
         isOpen={isMetaOpen}
         onClose={() => setIsMetaOpen(false)}
+        config={config}
+        onNotify={addNotification}
+      />
+
+      <BatchExportModal
+        isOpen={isBatchOpen}
+        onClose={() => setIsBatchOpen(false)}
         config={config}
         onNotify={addNotification}
       />

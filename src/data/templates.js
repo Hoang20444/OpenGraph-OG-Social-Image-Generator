@@ -78,6 +78,54 @@ export const COLOR_THEMES = [
     gradient: 'linear-gradient(135deg, #2563eb 0%, #6366f1 100%)',
     glowColor: 'rgba(37, 99, 235, 0.15)',
     border: 'rgba(0, 0, 0, 0.12)'
+  },
+  {
+    id: 'tokyo-neon',
+    name: 'Tokyo Cyberpunk',
+    primary: '#f43f5e',
+    secondary: '#06b6d4',
+    bg: '#050512',
+    surface: '#0d0d24',
+    text: '#ffffff',
+    gradient: 'linear-gradient(135deg, #f43f5e 0%, #a855f7 50%, #06b6d4 100%)',
+    glowColor: 'rgba(244, 63, 94, 0.4)',
+    border: 'rgba(244, 63, 94, 0.35)'
+  },
+  {
+    id: 'matcha-zen',
+    name: 'Matcha Forest',
+    primary: '#10b981',
+    secondary: '#84cc16',
+    bg: '#06130c',
+    surface: '#0e2417',
+    text: '#ffffff',
+    gradient: 'linear-gradient(135deg, #10b981 0%, #84cc16 100%)',
+    glowColor: 'rgba(16, 185, 129, 0.35)',
+    border: 'rgba(16, 185, 129, 0.3)'
+  },
+  {
+    id: 'nordic-ice',
+    name: 'Nordic Glacier',
+    primary: '#38bdf8',
+    secondary: '#818cf8',
+    bg: '#070f1e',
+    surface: '#0f1f3d',
+    text: '#ffffff',
+    gradient: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
+    glowColor: 'rgba(56, 189, 248, 0.35)',
+    border: 'rgba(56, 189, 248, 0.3)'
+  },
+  {
+    id: 'artisan-gold',
+    name: 'Artisan Espresso',
+    primary: '#f59e0b',
+    secondary: '#b45309',
+    bg: '#140c06',
+    surface: '#24170d',
+    text: '#ffffff',
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+    glowColor: 'rgba(245, 158, 11, 0.4)',
+    border: 'rgba(245, 158, 11, 0.3)'
   }
 ];
 

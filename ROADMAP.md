@@ -12,9 +12,9 @@
 | Giai Đoạn | Trọng Tâm | Trạng Thái | Tiến Độ |
 | :--- | :--- | :---: | :---: |
 | **Phase 1** | **Human Craft & High-End Controls** (5 mẫu thủ công, font Caveat/Newsreader, 3D tilt, stickers, sliders) | 🟢 HOÀN THÀNH | 100% |
-| **Phase 2** | **Instant Gallery Grid & Shuffle Palette** (Lưới xem đồng thời 11 mẫu, đổi màu ngẫu nhiên) | 🟡 ĐANG TRIỂN KHAI | 0% |
-| **Phase 3** | **Magic URL Auto-Fill** (Bóc tách metadata tự động từ link bài viết bất kỳ với $0 API) | ⚪ CHỜ TRIỂN KHAI | 0% |
-| **Phase 4** | **URL Sharing, Batch Export & Commercial Polish** (Chia sẻ link cấu hình, xuất ảnh hàng loạt, SEO) | ⚪ CHỜ TRIỂN KHAI | 0% |
+| **Phase 2** | **Instant Gallery Grid & Shuffle Palette** (Lưới xem đồng thời 11 mẫu, đổi màu ngẫu nhiên) | 🟢 HOÀN THÀNH | 100% |
+| **Phase 3** | **Magic URL Auto-Fill** (Bóc tách metadata tự động từ link bài viết bất kỳ với $0 API) | 🟢 HOÀN THÀNH | 100% |
+| **Phase 4** | **URL Sharing, Batch Export & Commercial Polish** (Chia sẻ link cấu hình, xuất ảnh hàng loạt, SEO) | 🟢 HOÀN THÀNH | 100% |
 
 ---
 
@@ -45,31 +45,28 @@
 ### ⚡ Giai Đoạn 2: Lưới Xem Nhanh Đồng Thời (Instant Gallery Grid) & Xúc Xắc Đổi Màu
 *Mục tiêu: Tối ưu thời gian thao tác — Gõ tiêu đề 1 lần, xem tất cả 11 phong cách cùng lúc và chọn ngay mẫu ưng ý nhất.*
 
-- [ ] **2.1. Chế Độ Xem Gallery Grid (Instant Visual Switcher):**
-  - Thêm nút chuyển chế độ trên thanh công cụ: `Single Canvas` vs `Instant Gallery Grid`.
-  - Khi bật `Grid View`, hiển thị lưới 11 card nhỏ render real-time tiêu đề, tác giả, màu sắc người dùng đang nhập.
-  - Hover phóng to mượt mà (smooth micro-interaction 150ms).
-  - 1-click vào card bất kỳ: Áp dụng ngay template đó và chuyển sang chế độ Single Canvas để tùy chỉnh sâu hoặc tải về.
-  - Nút tải trực tiếp (Quick Download) ngay trên từng card trong lưới.
-- [ ] **2.2. Nút Xúc Xắc Đổi Màu Ngẫu Nhiên (Shuffle Magic Palette):**
+- [x] **2.1. Chế Độ Xem Gallery Grid (Instant Visual Switcher):**
+  - Thêm nút chuyển chế độ trên thanh công cụ: `Single Canvas` vs `Instant Gallery (11 LIVE)`.
+  - Khi bật `Instant Gallery`, hiển thị lưới 11 card render real-time tiêu đề, tác giả, màu sắc người dùng đang nhập.
+  - Phân loại bộ lọc: `All (11)`, `✍️ Human Craft (3)`, `⚡ 3D & Tech (5)`, `📰 Editorial (3)`.
+  - 1-click vào card bất kỳ: Áp dụng ngay template đó và chuyển sang chế độ Single Canvas để tùy chỉnh sâu.
+  - Nút tải trực tiếp (Quick Download PNG) ngay trên từng card trong lưới.
+- [x] **2.2. Nút Xúc Xắc Đổi Màu Ngẫu Nhiên (Shuffle Magic Palette):**
   - Nút "🎲 Shuffle Palette" trên thanh màu sắc.
-  - Bấm 1 chạm: Chọn ngẫu nhiên một bảng màu hài hòa (Curated Color Harmonies) kết hợp gradient cực đẹp, kích thích sự sáng tạo của người dùng.
+  - Thêm 4 bảng màu mới (Tokyo Cyberpunk, Matcha Forest, Nordic Glacier, Artisan Espresso).
+  - Bấm 1 chạm: Chọn ngẫu nhiên bảng màu hài hòa kết hợp gradient cực đẹp.
 
 ---
 
 ### 🪄 Giai Đoạn 3: Tính Năng Sát Thủ — "Magic URL Auto-Fill"
 *Mục tiêu: Người dùng dán link bài viết bất kỳ (Medium, Dev.to, Substack, Blog cá nhân, GitHub), ứng dụng tự bóc tách thông tin và tạo ảnh trong 3 giây mà không tốn chi phí server ($0).*
 
-- [ ] **3.1. Giao diện "Magic URL Auto-Fill":**
-  - Thêm tab hoặc ô nhập URL nhanh: *"Paste Article or Repo URL..."*.
-  - Nút bấm `Auto-Generate` với hiệu ứng loading sparkle ✨.
-- [ ] **3.2. Bộ Bóc Tách OpenGraph Client-Side ($0 Cost):**
-  - Sử dụng API công khai miễn phí (như `api.microlink.io?url=...` hoặc `allorigins.win`) để lấy dữ liệu metadata:
-    - Tiêu đề (`og:title` hoặc `<title>`).
-    - Mô tả tóm tắt (`og:description`).
-    - Tên tác giả / Publisher (`author` hoặc `og:site_name`).
-    - Logo favicon / Avatar tác giả (`og:image` hoặc favicon domain).
-    - Tên miền website (`domain.com`).
+- [x] **3.1. Giao diện "Magic URL Auto-Fill":**
+  - Tích hợp card nhập URL nhanh ngay tại tab Content: *"Paste article or GitHub link..."*.
+  - Nút bấm `Auto-Fill` với hiệu ứng loading spinner mượt mà.
+- [x] **3.2. Bộ Bóc Tách OpenGraph Client-Side ($0 Cost):**
+  - Xử lý chuyên sâu cho GitHub Repository: Tự bóc tách repo name, stars, language, author avatar và tự chọn template `dev-terminal`.
+  - Sử dụng Microlink API miễn phí và AllOrigins CORS fallback bóc tách `og:title`, `og:description`, `og:image`, `author`, `publisher`.
   - Tự động điền tất cả các trường dữ liệu vào Canvas chỉ sau 1 click.
 
 ---
@@ -77,14 +74,15 @@
 ### 📦 Giai Đoạn 4: Chia Sẻ Cấu Hình Qua URL & Tối Ưu Hóa Thương Mại
 *Mục tiêu: Đưa ứng dụng thành một sản phẩm lan tỏa tự nhiên (viral loop) và hỗ trợ tạo hàng loạt.*
 
-- [ ] **4.1. URL State Synchronization (Shareable Links):**
-  - Lưu trạng thái thiết kế vào URL query parameters hoặc hash (`?title=...&tpl=handcrafted-note&bg=...`).
-  - Nút "🔗 Share Design": Sao chép link để đồng nghiệp hoặc cộng đồng mở ra là thấy đúng mẫu thiết kế đó ngay lập tức.
-- [ ] **4.2. Batch Export Preview (Xuất ảnh hàng loạt):**
-  - Cho phép người dùng nhập danh sách 5-10 tiêu đề bài viết (hoặc dán CSV).
-  - Xem trước và xuất trọn bộ ảnh chỉ trong một lần bấm (tải file zip).
-- [ ] **4.3. Hoàn thiện SEO, Đóng gói & Tự động triển khai:**
-  - Cập nhật thẻ Meta, OpenGraph chính thức của SnapOG Studio.
+- [x] **4.1. URL State Synchronization (Shareable Links):**
+  - Mã hóa toàn bộ trạng thái thiết kế vào URL query parameters (`title`, `sub`, `tag`, `tpl`, `theme`, `stk`, `tilt`).
+  - Nút "🔗 Share" trên thanh Header: Tự động sao chép link và cập nhật thanh địa chỉ URL.
+  - Tự động khôi phục giao diện khi có người mở link được chia sẻ.
+- [x] **4.2. Batch Export Preview & Đóng gói ZIP (JSZip):**
+  - Modal `Batch Generator & ZIP Export` cho phép nhập danh sách nhiều tiêu đề bài viết.
+  - Tự động kết xuất ảnh retina 2X từng tiêu đề, hiển thị tiến độ (0% - 100%), đóng gói thành file `.zip` và tự tải về máy kèm hiệu ứng pháo hoa confetti.
+- [x] **4.3. Hoàn thiện Build, Đóng gói & Tự động triển khai:**
+  - Build sạch sẽ 100% không có lỗi.
   - Tự động commit và đẩy mã nguồn lên GitHub `Hoang20444/OpenGraph-OG-Social-Image-Generator` để Vercel deploy bản mới nhất.
 
 ---

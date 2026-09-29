@@ -21,7 +21,10 @@ import {
   Maximize2,
   Box,
   Sliders,
-  Tag
+  Tag,
+  Dices,
+  Loader2,
+  Link2
 } from 'lucide-react';
 import { 
   TEMPLATES, 
@@ -30,6 +33,7 @@ import {
   DEFAULT_AVATARS,
   STICKERS
 } from '../data/templates';
+import { fetchUrlMetadata } from '../utils/magicFetcher';
 
 const BRAND_ICONS = [
   { id: 'sparkles', label: 'Sparkles', Icon: Sparkles },
@@ -47,9 +51,42 @@ export default function Sidebar({
   config,
   onChange,
   onOpenPro,
-  isPro
+  isPro,
+  onShufflePalette,
+  onNotify
 }) {
   const [activeTab, setActiveTab] = useState('templates'); // 'templates' | 'content' | 'styling' | 'pro'
+  const [magicUrl, setMagicUrl] = useState('');
+  const [isLoadingMagic, setIsLoadingMagic] = useState(false);
+
+  const handleMagicFetch = async () => {
+    if (!magicUrl.trim()) {
+      if (onNotify) onNotify('⚠️ Vui lòng nhập link bài viết hoặc repository');
+      return;
+    }
+    setIsLoadingMagic(true);
+    try {
+      const data = await fetchUrlMetadata(magicUrl);
+      onChange({
+        ...config,
+        title: data.title || config.title,
+        subtitle: data.subtitle || config.subtitle,
+        authorName: data.authorName || config.authorName,
+        authorRole: data.authorRole || config.authorRole,
+        siteUrl: data.siteUrl || config.siteUrl,
+        categoryTag: data.categoryTag || config.categoryTag,
+        avatarUrl: data.avatarUrl || config.avatarUrl,
+        ...(data.templateId ? { templateId: data.templateId } : {}),
+        ...(data.themeId ? { themeId: data.themeId } : {})
+      });
+      if (onNotify) onNotify(`✨ Đã tự động bóc tách thông tin từ ${data.siteUrl}!`);
+      setMagicUrl('');
+    } catch (err) {
+      if (onNotify) onNotify(`⚠️ Lỗi bóc tách metadata: ${err.message}`);
+    } finally {
+      setIsLoadingMagic(false);
+    }
+  };
 
   const handleTextChange = (field, val) => {
     onChange({ ...config, [field]: val });
@@ -258,6 +295,76 @@ export default function Sidebar({
         {/* TAB 2: CONTENT & COPY */}
         {activeTab === 'content' && (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {/* Magic URL Auto-Fill Box ($0 Free) */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: '12px',
+              padding: '12px 14px',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} color="#818cf8" />
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff' }}>
+                    Magic URL Auto-Fill
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: 'rgba(16, 185, 129, 0.18)',
+                  color: '#34d399',
+                  border: '1px solid rgba(16, 185, 129, 0.3)'
+                }}>
+                  $0 FREE
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="url"
+                  placeholder="Paste article or GitHub link..."
+                  value={magicUrl}
+                  onChange={(e) => setMagicUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleMagicFetch()}
+                  className="input-field"
+                  style={{ fontSize: '12px', padding: '7px 10px', flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleMagicFetch}
+                  disabled={isLoadingMagic}
+                  className="btn-primary"
+                  style={{
+                    padding: '7px 12px',
+                    fontSize: '12px',
+                    whiteSpace: 'nowrap',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  {isLoadingMagic ? (
+                    <>
+                      <Loader2 size={13} className="spin" />
+                      <span>Fetching...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={13} />
+                      <span>Auto-Fill</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>
+                Supports Medium, Substack, Dev.to, GitHub repos & personal blogs
+              </div>
+            </div>
+
             {/* Title */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -472,7 +579,27 @@ export default function Sidebar({
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Color Themes */}
             <div>
-              <label className="input-label">Color Gradient Theme</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="input-label" style={{ margin: 0 }}>Color Gradient Theme</label>
+                <button
+                  type="button"
+                  onClick={onShufflePalette}
+                  className="btn-secondary"
+                  style={{
+                    fontSize: '11px',
+                    padding: '3px 8px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#f59e0b',
+                    borderColor: 'rgba(245, 158, 11, 0.3)'
+                  }}
+                  title="Randomize color theme"
+                >
+                  <Dices size={13} />
+                  <span>Shuffle 🎲</span>
+                </button>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                 {COLOR_THEMES.map((theme) => {
                   const isSelected = config.themeId === theme.id;

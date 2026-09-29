@@ -18,6 +18,8 @@ export default function Header({
   onOpenPro, 
   onOpenCoffee, 
   onOpenMeta, 
+  onShareDesign,
+  onOpenBatch,
   isPro 
 }) {
   return (
@@ -121,16 +123,43 @@ export default function Header({
         </div>
 
         {/* Right Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Batch Generator */}
+          <button
+            onClick={onOpenBatch}
+            className="btn-secondary"
+            style={{ 
+              fontSize: '13px', 
+              padding: '7px 12px',
+              color: '#34d399',
+              borderColor: 'rgba(16, 185, 129, 0.3)'
+            }}
+            title="Batch generation & download all as ZIP"
+          >
+            <Layers size={14} />
+            <span>Batch ZIP</span>
+          </button>
+
+          {/* Share Design Link */}
+          <button
+            onClick={onShareDesign}
+            className="btn-secondary"
+            style={{ fontSize: '13px', padding: '7px 12px' }}
+            title="Share this design via link"
+          >
+            <Share2 size={14} />
+            <span>Share</span>
+          </button>
+
           {/* Get Meta Tags */}
           <button
             onClick={onOpenMeta}
             className="btn-secondary"
-            style={{ fontSize: '13px', padding: '7px 14px' }}
+            style={{ fontSize: '13px', padding: '7px 12px' }}
             title="Generate HTML and Next.js <meta> tags"
           >
-            <Code2 size={15} />
-            <span>Copy Meta Tags</span>
+            <Code2 size={14} />
+            <span>Meta Tags</span>
           </button>
 
           {/* Buy Me a Coffee */}
