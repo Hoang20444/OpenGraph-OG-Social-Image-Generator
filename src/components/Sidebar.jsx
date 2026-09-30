@@ -26,8 +26,14 @@ import {
   Loader2,
   Link2,
   Highlighter,
-  Paintbrush
+  Paintbrush,
+  TrendingUp,
+  Search,
+  RefreshCw,
+  ArrowUpRight,
+  Activity
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { 
   TEMPLATES, 
   COLOR_THEMES, 
@@ -37,6 +43,11 @@ import {
   FONT_FAMILIES
 } from '../data/templates';
 import { fetchUrlMetadata } from '../utils/magicFetcher';
+import { 
+  TREND_CATEGORIES, 
+  INITIAL_TRENDING_TOPICS, 
+  refreshTrendingPipeline 
+} from '../data/trendingTopics';
 
 const BRAND_ICONS = [
   { id: 'sparkles', label: 'Sparkles', Icon: Sparkles },
@@ -58,9 +69,64 @@ export default function Sidebar({
   onShufflePalette,
   onNotify
 }) {
-  const [activeTab, setActiveTab] = useState('templates'); // 'templates' | 'content' | 'styling' | 'pro'
+  const [activeTab, setActiveTab] = useState('trends'); // 'trends' | 'templates' | 'content' | 'styling' | 'pro'
   const [magicUrl, setMagicUrl] = useState('');
   const [isLoadingMagic, setIsLoadingMagic] = useState(false);
+
+  // AI Trend Radar state
+  const [trendingList, setTrendingList] = useState(INITIAL_TRENDING_TOPICS);
+  const [selectedTrendCategory, setSelectedTrendCategory] = useState('all');
+  const [trendSearchQuery, setTrendSearchQuery] = useState('');
+  const [isRefreshingTrends, setIsRefreshingTrends] = useState(false);
+
+  const handleApplyTrend = (trend) => {
+    onChange({
+      ...config,
+      title: trend.headline,
+      subtitle: trend.subtitle,
+      categoryTag: trend.categoryTag,
+      highlightWord: trend.highlightWord,
+      ...(trend.suggestedTemplate ? { templateId: trend.suggestedTemplate } : {}),
+      ...(trend.suggestedTheme ? { themeId: trend.suggestedTheme } : {})
+    });
+    if (onNotify) {
+      onNotify(`🔥 Đã nạp xu hướng: "${trend.topic}" vào thiết kế!`);
+    }
+    try {
+      confetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.6 }
+      });
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleRefreshTrends = async () => {
+    setIsRefreshingTrends(true);
+    try {
+      const refreshed = await refreshTrendingPipeline();
+      setTrendingList(refreshed);
+      if (onNotify) {
+        onNotify('⚡ Radar AI đã quét và làm mới tốc độ tăng trưởng xu hướng!');
+      }
+    } catch {
+      if (onNotify) onNotify('⚠️ Không thể làm mới dữ liệu radar');
+    } finally {
+      setIsRefreshingTrends(false);
+    }
+  };
+
+  const filteredTrends = trendingList.filter((item) => {
+    const matchesCategory = selectedTrendCategory === 'all' || item.category === selectedTrendCategory;
+    const matchesSearch = !trendSearchQuery.trim() || 
+      item.topic.toLowerCase().includes(trendSearchQuery.toLowerCase()) ||
+      item.headline.toLowerCase().includes(trendSearchQuery.toLowerCase()) ||
+      item.platform.toLowerCase().includes(trendSearchQuery.toLowerCase()) ||
+      item.categoryTag.toLowerCase().includes(trendSearchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const handleMagicFetch = async () => {
     if (!magicUrl.trim()) {
@@ -120,7 +186,7 @@ export default function Sidebar({
       {/* Navigation Tabs */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(5, 1fr)',
         borderBottom: '1px solid var(--border-subtle)',
         background: 'rgba(0, 0, 0, 0.2)',
         position: 'sticky',
@@ -128,9 +194,10 @@ export default function Sidebar({
         zIndex: 20
       }}>
         {[
+          { id: 'trends', label: 'Bắt Trend 🔥', icon: TrendingUp },
           { id: 'templates', label: 'Giao diện', icon: LayoutTemplate },
           { id: 'content', label: 'Nội dung', icon: Type },
-          { id: 'styling', label: 'Màu & Font', icon: Palette },
+          { id: 'styling', label: 'Màu sắc', icon: Palette },
           { id: 'pro', label: 'Gói PRO', icon: Crown }
         ].map((tab) => {
           const Icon = tab.icon;
@@ -140,7 +207,7 @@ export default function Sidebar({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
-                padding: '12px 6px',
+                padding: '12px 4px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -163,6 +230,285 @@ export default function Sidebar({
       {/* Tab Panels */}
       <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
         
+        {/* TAB 0: AI SOCIAL TREND RADAR */}
+        {activeTab === 'trends' && (
+          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Header Banner */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(245, 158, 11, 0.08))',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              borderRadius: '12px',
+              padding: '16px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: '#ef4444',
+                    boxShadow: '0 0 10px #ef4444',
+                    display: 'inline-block'
+                  }} />
+                  <span style={{ fontWeight: 800, fontSize: '13px', color: '#ffffff', letterSpacing: '0.5px' }}>
+                    AI SOCIAL TREND RADAR
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '9px',
+                  fontWeight: 800,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  color: '#f87171',
+                  border: '1px solid rgba(239, 68, 68, 0.3)'
+                }}>
+                  LIVE PIPELINE
+                </span>
+              </div>
+
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.5', margin: '0 0 12px 0' }}>
+                Hệ thống AI tự động quét & dự báo chủ đề đang bùng nổ trên TikTok, Facebook, Threads & X. Bấm chọn để tự động thiết kế ảnh đón đầu xu hướng.
+              </p>
+
+              <button
+                onClick={handleRefreshTrends}
+                disabled={isRefreshingTrends}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  color: '#ffffff',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: isRefreshingTrends ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <RefreshCw size={12} className={isRefreshingTrends ? 'animate-spin' : ''} />
+                <span>{isRefreshingTrends ? 'Đang chạy ETL Pipeline quét dữ liệu...' : 'Làm Mới Tốc Độ Tăng Trưởng (Live Refresh)'}</span>
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div style={{ position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
+              <input
+                type="text"
+                placeholder="Tìm chủ đề, từ khóa, nền tảng..."
+                value={trendSearchQuery}
+                onChange={(e) => setTrendSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px 9px 34px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'rgba(0, 0, 0, 0.2)',
+                  color: '#ffffff',
+                  fontSize: '12px',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            {/* Category Filter Pills */}
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              paddingBottom: '4px',
+              scrollbarWidth: 'none'
+            }}>
+              {TREND_CATEGORIES.map((cat) => {
+                const isSelected = selectedTrendCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedTrendCategory(cat.id)}
+                    style={{
+                      whiteSpace: 'nowrap',
+                      padding: '5px 10px',
+                      borderRadius: '16px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--border-subtle)',
+                      background: isSelected ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.03)',
+                      color: isSelected ? '#ffffff' : 'var(--text-dim)',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Summary Indicator */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-dim)' }}>
+              <span>Đang hiển thị {filteredTrends.length} xu hướng</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981' }}>
+                <Activity size={12} /> Độ tin cậy AI: 92% - 98%
+              </span>
+            </div>
+
+            {/* List of Trending Cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {filteredTrends.length === 0 ? (
+                <div style={{
+                  padding: '30px 16px',
+                  textAlign: 'center',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: '10px',
+                  border: '1px dashed var(--border-subtle)',
+                  color: 'var(--text-dim)',
+                  fontSize: '12px'
+                }}>
+                  Không tìm thấy chủ đề phù hợp với từ khóa "{trendSearchQuery}".
+                </div>
+              ) : (
+                filteredTrends.map((trend) => (
+                  <div
+                    key={trend.id}
+                    className="glass-card"
+                    style={{
+                      padding: '14px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                      transition: 'all 0.2s',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        color: 'var(--text-dim)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        padding: '2px 8px',
+                        borderRadius: '4px'
+                      }}>
+                        {trend.platform}
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          color: '#f59e0b',
+                          background: 'rgba(245, 158, 11, 0.1)',
+                          padding: '2px 6px',
+                          borderRadius: '4px'
+                        }}>
+                          {trend.status}
+                        </span>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          background: 'linear-gradient(135deg, #ef4444, #f59e0b)',
+                          color: '#ffffff',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}>
+                          <TrendingUp size={11} /> {trend.growth}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Topic & Headline */}
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>
+                        {trend.topic}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-main)', lineHeight: '1.4', fontWeight: 500 }}>
+                        "{trend.headline}"
+                      </p>
+                    </div>
+
+                    {/* Subtitle Snippet */}
+                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-dim)', lineHeight: '1.4' }}>
+                      {trend.subtitle}
+                    </p>
+
+                    {/* Tag & Highlight Meta */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        color: 'var(--color-primary)',
+                        background: 'rgba(99, 102, 241, 0.1)',
+                        padding: '2px 6px',
+                        borderRadius: '4px'
+                      }}>
+                        {trend.categoryTag}
+                      </span>
+                      <span style={{
+                        fontSize: '9px',
+                        color: 'var(--text-muted)',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        padding: '2px 6px',
+                        borderRadius: '4px'
+                      }}>
+                        Từ khóa: <strong>{trend.highlightWord}</strong>
+                      </span>
+                    </div>
+
+                    {/* Action Footer */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: '4px',
+                      paddingTop: '8px',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.05)'
+                    }}>
+                      <span style={{ fontSize: '10px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Activity size={10} /> {trend.confidence}
+                      </span>
+                      <button
+                        onClick={() => handleApplyTrend(trend)}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                          color: '#ffffff',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        <span>Tạo Ảnh Đón Trend</span>
+                        <ArrowUpRight size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
         {/* TAB 1: TEMPLATES & RATIOS */}
         {activeTab === 'templates' && (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
