@@ -1,0 +1,37 @@
+name: Auto Fetch Real Social Trends Pipeline
+
+on:
+  schedule:
+    # Chạy tự động mỗi 6 tiếng một lần (0:00, 6:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
+  # Cho phép kích hoạt thủ công bằng nút "Run workflow" trên GitHub
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-trends:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 🚀 Run Social Trends ETL Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node scripts/fetch_social_trends.mjs
+
+      - name: 💾 Commit & Push live trends to repository
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add public/data/live_trends.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(trends): Auto-update real-time social trends [skip ci]" && git push origin main)

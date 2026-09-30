@@ -46,7 +46,8 @@ import { fetchUrlMetadata } from '../utils/magicFetcher';
 import { 
   TREND_CATEGORIES, 
   INITIAL_TRENDING_TOPICS, 
-  refreshTrendingPipeline 
+  refreshTrendingPipeline,
+  fetchLiveTrends
 } from '../data/trendingTopics';
 
 const BRAND_ICONS = [
@@ -79,6 +80,16 @@ export default function Sidebar({
   const [selectedTrendCategory, setSelectedTrendCategory] = useState('all');
   const [trendSearchQuery, setTrendSearchQuery] = useState('');
   const [isRefreshingTrends, setIsRefreshingTrends] = useState(false);
+  const [livePipelineMeta, setLivePipelineMeta] = useState(null);
+
+  React.useEffect(() => {
+    fetchLiveTrends().then((res) => {
+      if (res && res.isLive) {
+        setTrendingList(res.trends);
+        setLivePipelineMeta(res.updatedAt);
+      }
+    });
+  }, []);
 
   const handleApplyTrend = (trend) => {
     onChange({
@@ -262,11 +273,11 @@ export default function Sidebar({
                   fontWeight: 800,
                   padding: '2px 6px',
                   borderRadius: '4px',
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  color: '#f87171',
-                  border: '1px solid rgba(239, 68, 68, 0.3)'
+                  background: livePipelineMeta ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                  color: livePipelineMeta ? '#34d399' : '#f87171',
+                  border: livePipelineMeta ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'
                 }}>
-                  LIVE PIPELINE
+                  {livePipelineMeta ? 'LIVE REAL-TIME DATA' : 'LIVE PIPELINE'}
                 </span>
               </div>
 

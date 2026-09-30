@@ -134,12 +134,39 @@ export const INITIAL_TRENDING_TOPICS = [
   }
 ];
 
-// Hàm mô phỏng Pipeline ETL làm mới dữ liệu thời gian thực
+// Hàm nạp dữ liệu xu hướng thực tế từ pipeline (public/data/live_trends.json)
+export async function fetchLiveTrends() {
+  try {
+    const res = await fetch(`/data/live_trends.json?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.trends) && data.trends.length > 0) {
+        return {
+          isLive: true,
+          updatedAt: data.updatedAt,
+          trends: data.trends
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️ Không thể tải live_trends.json, dùng dữ liệu dự phòng:', err.message);
+  }
+
+  return {
+    isLive: false,
+    updatedAt: null,
+    trends: INITIAL_TRENDING_TOPICS
+  };
+}
+
+// Cập nhật lại refreshTrendingPipeline() để ưu tiên nạp từ file JSON thực tế
 export async function refreshTrendingPipeline() {
-  // Giả lập độ trễ Extract & Transform (300ms)
-  await new Promise((resolve) => setTimeout(resolve, 350));
-  
-  // Xáo trộn nhẹ và cập nhật tốc độ tăng trưởng ngẫu nhiên để mô phỏng dữ liệu thời gian thực
+  const liveResult = await fetchLiveTrends();
+  if (liveResult.isLive) {
+    return liveResult.trends;
+  }
+
+  // Fallback nếu không có file JSON
   return INITIAL_TRENDING_TOPICS.map((item) => {
     const randomBoost = Math.floor(Math.random() * 60) - 20;
     const currentGrowth = parseInt(item.growth.replace(/[^0-9]/g, ''), 10);
