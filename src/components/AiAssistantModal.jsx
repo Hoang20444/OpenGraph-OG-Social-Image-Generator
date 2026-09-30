@@ -18,6 +18,9 @@ import confetti from 'canvas-confetti';
 import { 
   getStoredGeminiKey, 
   saveStoredGeminiKey, 
+  getStoredGeminiModel,
+  saveStoredGeminiModel,
+  AVAILABLE_MODELS,
   generateAiSocialHooks 
 } from '../utils/geminiAi';
 
@@ -39,8 +42,9 @@ export default function AiAssistantModal({
   const [suggestions, setSuggestions] = useState([]);
   const [engineSource, setEngineSource] = useState('');
   
-  // API Key management state
+  // API Key & Model management state
   const [apiKey, setApiKey] = useState('');
+  const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
   const [isConfiguringKey, setIsConfiguringKey] = useState(false);
   const [hasCustomKey, setHasCustomKey] = useState(false);
 
@@ -49,6 +53,7 @@ export default function AiAssistantModal({
       const stored = getStoredGeminiKey();
       setApiKey(stored);
       setHasCustomKey(Boolean(stored));
+      setSelectedModel(getStoredGeminiModel());
     }
   }, [isOpen]);
 
@@ -56,11 +61,12 @@ export default function AiAssistantModal({
 
   const handleSaveKey = () => {
     saveStoredGeminiKey(apiKey);
+    saveStoredGeminiModel(selectedModel);
     const hasKey = Boolean(apiKey.trim());
     setHasCustomKey(hasKey);
     setIsConfiguringKey(false);
     if (onNotify) {
-      onNotify(hasKey ? '✅ Đã lưu Google Gemini API Key vào trình duyệt!' : 'ℹ️ Đã xóa khóa API, chuyển về bộ sinh thông minh');
+      onNotify(hasKey ? `✅ Đã lưu cấu hình AI (${selectedModel}) vào trình duyệt!` : 'ℹ️ Đã xóa khóa API, chuyển về bộ sinh thông minh');
     }
   };
 
@@ -182,7 +188,7 @@ export default function AiAssistantModal({
                   color: hasCustomKey ? '#34d399' : '#f59e0b',
                   border: hasCustomKey ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)'
                 }}>
-                  {hasCustomKey ? 'GEMINI 1.5 FLASH CONNECTED' : 'HEURISTIC SMART ENGINE'}
+                  {hasCustomKey ? `${selectedModel.toUpperCase()} CONNECTED` : 'HEURISTIC SMART ENGINE'}
                 </span>
               </div>
               <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-dim)' }}>
@@ -206,10 +212,10 @@ export default function AiAssistantModal({
                 alignItems: 'center',
                 gap: '5px'
               }}
-              title="Cài đặt khóa Google Gemini API miễn phí"
+              title="Cài đặt mô hình AI & khóa Google Gemini API miễn phí"
             >
               <Key size={12} />
-              <span>{hasCustomKey ? 'Đổi Khóa API' : 'Thêm API Key'}</span>
+              <span>{hasCustomKey ? 'Cài Đặt Model & Key' : 'Thêm API Key'}</span>
             </button>
 
             <button
@@ -231,7 +237,7 @@ export default function AiAssistantModal({
           </div>
         </div>
 
-        {/* API Key Configuration Drawer */}
+        {/* API Key & Model Configuration Drawer */}
         {isConfiguringKey && (
           <div style={{
             padding: '14px 20px',
@@ -239,11 +245,11 @@ export default function AiAssistantModal({
             borderBottom: '1px solid rgba(99, 102, 241, 0.2)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Key size={13} color="#6366f1" /> Cấu hình Google Gemini 1.5 Flash API (Miễn phí 100%)
+                <Key size={13} color="#6366f1" /> Cấu hình Mô hình & Khóa Google Gemini API
               </span>
               <a
                 href="https://aistudio.google.com/app/apikey"
@@ -263,39 +269,74 @@ export default function AiAssistantModal({
               </a>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="password"
-                placeholder="Dán mã API Key của bạn (bắt đầu bằng AIzaSy...)"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-subtle)',
-                  background: 'rgba(0, 0, 0, 0.4)',
-                  color: '#ffffff',
-                  fontSize: '12px',
-                  fontFamily: 'monospace',
-                  outline: 'none'
-                }}
-              />
-              <button
-                onClick={handleSaveKey}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  background: '#6366f1',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                Lưu Khóa
-              </button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', gap: '10px' }}>
+              <div>
+                <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                  Mô hình AI (Model):
+                </label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-subtle)',
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    color: '#ffffff',
+                    fontSize: '12px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {AVAILABLE_MODELS.map((m) => (
+                    <option key={m.id} value={m.id} style={{ background: '#131722', color: '#ffffff' }}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                  Khóa Gemini API Key:
+                </label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="password"
+                    placeholder="Dán mã API Key (AIzaSy...)"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'rgba(0, 0, 0, 0.4)',
+                      color: '#ffffff',
+                      fontSize: '12px',
+                      fontFamily: 'monospace',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={handleSaveKey}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      background: '#6366f1',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Lưu Cấu Hình
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-dim)' }}>

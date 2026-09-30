@@ -5,6 +5,13 @@
 // =============================================================================
 
 export const STORAGE_KEY_GEMINI = 'snapog_gemini_api_key';
+export const STORAGE_KEY_MODEL = 'snapog_gemini_model';
+
+export const AVAILABLE_MODELS = [
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Khuyên dùng - Siêu tốc & Miễn phí)' },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Suy luận sâu & Viết văn tinh tế)' },
+  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental (Mô hình thế hệ mới)' }
+];
 
 export function getStoredGeminiKey() {
   try {
@@ -23,6 +30,26 @@ export function saveStoredGeminiKey(key) {
     }
   } catch (err) {
     console.error('Failed to save Gemini key:', err);
+  }
+}
+
+export function getStoredGeminiModel() {
+  try {
+    return localStorage.getItem(STORAGE_KEY_MODEL) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-1.5-flash';
+  } catch {
+    return 'gemini-1.5-flash';
+  }
+}
+
+export function saveStoredGeminiModel(model) {
+  try {
+    if (!model || !model.trim()) {
+      localStorage.setItem(STORAGE_KEY_MODEL, 'gemini-1.5-flash');
+    } else {
+      localStorage.setItem(STORAGE_KEY_MODEL, model.trim());
+    }
+  } catch (err) {
+    console.error('Failed to save Gemini model:', err);
   }
 }
 
@@ -117,8 +144,9 @@ export async function generateAiSocialHooks(topic) {
     };
   }
 
-  // Gọi trực tiếp Google Gemini 1.5 Flash API với JSON Response Schema
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  // Gọi trực tiếp Google Gemini API với model đã chọn và JSON Response Schema
+  const selectedModel = getStoredGeminiModel();
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
 
   const promptText = `
 Bạn là Giám đốc Sáng tạo và Chuyên gia Viral Marketing trên TikTok, Facebook, Threads và LinkedIn.
@@ -189,7 +217,8 @@ Chỉ trả về JSON thuần túy, không bọc trong markdown code block.
     }
 
     return {
-      source: 'gemini_1.5_flash',
+      source: selectedModel,
+      model: selectedModel,
       suggestions: parsed.suggestions
     };
   } catch (err) {
