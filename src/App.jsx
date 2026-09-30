@@ -80,6 +80,12 @@ export default function App() {
   const [isBatchOpen, setIsBatchOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [aiInitialTab, setAiInitialTab] = useState('prompt');
+
+  const handleOpenAi = (tab = 'prompt') => {
+    setAiInitialTab(tab);
+    setIsAiOpen(true);
+  };
 
   // Toast Notification System
   const [toasts, setToasts] = useState([]);
@@ -261,7 +267,7 @@ export default function App() {
         savedCount={savedDesigns.length}
         onResetConfig={handleResetConfig}
         isPro={isPro}
-        onOpenAi={() => setIsAiOpen(true)}
+        onOpenAi={() => handleOpenAi('prompt')}
       />
 
       {/* Main Studio Body */}
@@ -274,7 +280,7 @@ export default function App() {
           isPro={isPro}
           onShufflePalette={handleShufflePalette}
           onNotify={addNotification}
-          onOpenAi={() => setIsAiOpen(true)}
+          onOpenAi={handleOpenAi}
         />
 
         {/* Center / Right Canvas Area */}
@@ -339,6 +345,7 @@ export default function App() {
       <AiAssistantModal
         isOpen={isAiOpen}
         onClose={() => setIsAiOpen(false)}
+        initialTab={aiInitialTab}
         onApplyHook={(hookConfig) => setConfig((prev) => ({ ...prev, ...hookConfig }))}
         onNotify={addNotification}
       />

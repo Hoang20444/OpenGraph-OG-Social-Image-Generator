@@ -310,7 +310,7 @@ export default function Sidebar({
               </button>
 
               <button
-                onClick={onOpenAi}
+                onClick={() => onOpenAi && onOpenAi('prompt')}
                 style={{
                   width: '100%',
                   marginTop: '8px',
@@ -331,7 +331,32 @@ export default function Sidebar({
                 }}
               >
                 <Sparkles size={13} color="#f472b6" />
-                <span>Bạn có chủ đề riêng? Để AI tự sinh 3 Hook triệu view 🪄</span>
+                <span>Bạn có chủ đề riêng? Để AI sinh 3 Hook triệu view 🪄</span>
+              </button>
+
+              <button
+                onClick={() => onOpenAi && onOpenAi('link')}
+                style={{
+                  width: '100%',
+                  marginTop: '6px',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))',
+                  color: '#ffffff',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 10px rgba(16, 185, 129, 0.2)',
+                  transition: 'all 0.15s'
+                }}
+              >
+                <Link2 size={13} color="#10b981" />
+                <span>🔗 Bóc Link AI (TikTok, FB, Threads) ➔ Tạo Ảnh Ngay</span>
               </button>
             </div>
 

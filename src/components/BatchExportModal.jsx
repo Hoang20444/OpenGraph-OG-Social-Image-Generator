@@ -1,9 +1,24 @@
 import React, { useState } from 'react';
-import { X, Layers, Download, CheckCircle2, AlertCircle, Loader2, Sparkles, FileArchive } from 'lucide-react';
+import { 
+  X, 
+  Layers, 
+  Download, 
+  CheckCircle2, 
+  AlertCircle, 
+  Loader2, 
+  Sparkles, 
+  FileArchive,
+  Flame,
+  Zap,
+  TrendingUp,
+  RefreshCw
+} from 'lucide-react';
 import { toPng } from 'html-to-image';
 import JSZip from 'jszip';
 import confetti from 'canvas-confetti';
 import { TEMPLATES } from '../data/templates';
+import { fetchLiveTrends, INITIAL_TRENDING_TOPICS } from '../data/trendingTopics';
+import { generateAiSocialHooks } from '../utils/geminiAi';
 
 export default function BatchExportModal({
   isOpen,
@@ -15,9 +30,12 @@ export default function BatchExportModal({
     `Bí quyết xây dựng thương hiệu cá nhân thu hút 10.000 người theo dõi\nChiến lược tối ưu hình ảnh mạng xã hội giúp tăng gấp đôi lượt click\nTop xu hướng thiết kế và sáng tạo nội dung dẫn đầu năm 2026\nLộ trình phát triển sản phẩm tinh gọn từ ý tưởng đến thực thi\nNghệ thuật kể chuyện (Storytelling) giúp giữ chân độc giả`
   );
   const [selectedTemplate, setSelectedTemplate] = useState(config.templateId);
-  const [cycleTemplates, setCycleTemplates] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isLoadingTrends, setIsLoadingTrends] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [showAiInput, setShowAiInput] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   if (!isOpen) return null;
 
@@ -25,6 +43,54 @@ export default function BatchExportModal({
     .split('\n')
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
+
+  // Auto-populate with top live trends from Google Trends VN / RSS pipeline
+  const handleLoadLiveTrends = async () => {
+    setIsLoadingTrends(true);
+    try {
+      const trends = await fetchLiveTrends();
+      const topItems = (trends && trends.length > 0) ? trends : INITIAL_TRENDING_TOPICS;
+      const extractedTitles = topItems
+        .slice(0, 8)
+        .map((item) => item.headline || item.title)
+        .filter(Boolean);
+
+      if (extractedTitles.length > 0) {
+        setTitlesText(extractedTitles.join('\n'));
+        if (onNotify) {
+          onNotify(`🔥 Đã nạp ${extractedTitles.length} xu hướng nóng hổi nhất vào danh sách!`);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load live trends into batch:', err);
+      if (onNotify) onNotify('⚠️ Không thể tải dữ liệu xu hướng lúc này');
+    } finally {
+      setIsLoadingTrends(false);
+    }
+  };
+
+  // Generate batch headlines with Gemini 3.x Flash
+  const handleGenerateBatchWithAi = async () => {
+    const topic = aiPrompt.trim() || 'Xu hướng AI và công nghệ 2026';
+    setIsGeneratingAi(true);
+    try {
+      const res = await generateAiSocialHooks(topic);
+      const suggestions = res.suggestions || [];
+      if (suggestions.length > 0) {
+        const newTitles = suggestions.map((s) => s.headline).join('\n');
+        setTitlesText(newTitles);
+        setShowAiInput(false);
+        setAiPrompt('');
+        if (onNotify) {
+          onNotify(`✨ Gemini AI đã tạo ${suggestions.length} tiêu đề đón sóng mới!`);
+        }
+      }
+    } catch (err) {
+      if (onNotify) onNotify(`⚠️ Lỗi sinh tiêu đề: ${err.message}`);
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
 
   const handleStartBatch = async () => {
     if (titles.length === 0) {
@@ -124,13 +190,15 @@ export default function BatchExportModal({
       <div 
         className="glass-panel" 
         style={{
-          maxWidth: '620px',
+          maxWidth: '660px',
           width: '100%',
           borderRadius: '16px',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           padding: '28px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-          position: 'relative'
+          position: 'relative',
+          maxHeight: '90vh',
+          overflowY: 'auto'
         }}
       >
         {/* Close Button */}
@@ -168,13 +236,121 @@ export default function BatchExportModal({
           </div>
           <div>
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>
-              Tạo Ảnh Hàng Loạt & Đóng Gói ZIP
+              Auto-Pilot: Tạo Ảnh Hàng Loạt & Đóng Gói ZIP
             </h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Nhập danh sách tiêu đề để tự động tạo và tải về toàn bộ ảnh cùng lúc (Tối ưu cho bài viết mạng xã hội, blog & podcast)
+              Nhập danh sách tiêu đề hoặc nạp tự động xu hướng đang hot để xuất toàn bộ ảnh cùng lúc (Retina 2X PNG)
             </p>
           </div>
         </div>
+
+        {/* Quick Action Helpers */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '14px',
+          flexWrap: 'wrap'
+        }}>
+          <button
+            type="button"
+            onClick={handleLoadLiveTrends}
+            disabled={isLoadingTrends || isProcessing}
+            style={{
+              padding: '7px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              background: 'rgba(239, 68, 68, 0.1)',
+              color: '#f87171',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: (isLoadingTrends || isProcessing) ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s'
+            }}
+          >
+            {isLoadingTrends ? <Loader2 size={13} className="animate-spin" /> : <Flame size={13} />}
+            <span>🔥 Nạp Top 8 Xu Hướng Hôm Nay (Google Trends)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowAiInput(!showAiInput)}
+            disabled={isProcessing}
+            style={{
+              padding: '7px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(99, 102, 241, 0.4)',
+              background: 'rgba(99, 102, 241, 0.1)',
+              color: '#818cf8',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s'
+            }}
+          >
+            <Sparkles size={13} />
+            <span>🤖 AI Viết Tiêu Đề Theo Chủ Đề</span>
+          </button>
+        </div>
+
+        {/* Inline AI Prompt Generator for Batch */}
+        {showAiInput && (
+          <div style={{
+            padding: '12px',
+            borderRadius: '10px',
+            background: 'rgba(99, 102, 241, 0.08)',
+            border: '1px solid rgba(99, 102, 241, 0.25)',
+            marginBottom: '14px',
+            display: 'flex',
+            gap: '8px'
+          }}>
+            <input
+              type="text"
+              placeholder="Nhập chủ đề (ví dụ: Khóa học lập trình, Kinh doanh online 2026...)"
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleGenerateBatchWithAi();
+              }}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid var(--border-subtle)',
+                background: 'rgba(0, 0, 0, 0.4)',
+                color: '#ffffff',
+                fontSize: '12px',
+                outline: 'none'
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleGenerateBatchWithAi}
+              disabled={isGeneratingAi}
+              style={{
+                padding: '0 14px',
+                borderRadius: '6px',
+                border: 'none',
+                background: '#6366f1',
+                color: '#ffffff',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: isGeneratingAi ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              {isGeneratingAi ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
+              <span>Sinh Tiêu Đề</span>
+            </button>
+          </div>
+        )}
 
         {/* Titles Input */}
         <div style={{ marginBottom: '16px' }}>
@@ -182,17 +358,17 @@ export default function BatchExportModal({
             <label className="input-label" style={{ margin: 0 }}>
               Danh sách tiêu đề bài viết (mỗi dòng 1 tiêu đề)
             </label>
-            <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: 700 }}>
-              {titles.length} ảnh sẽ được tạo
+            <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>
+              {titles.length} ảnh sẽ được đóng gói
             </span>
           </div>
           <textarea
-            rows={6}
+            rows={7}
             disabled={isProcessing}
             value={titlesText}
             onChange={(e) => setTitlesText(e.target.value)}
             className="input-field"
-            placeholder="Dán các tiêu đề bài viết vào đây..."
+            placeholder="Dán các tiêu đề bài viết vào đây (mỗi dòng một tiêu đề)..."
             style={{ fontSize: '13px', lineHeight: '1.5', resize: 'vertical' }}
           />
         </div>

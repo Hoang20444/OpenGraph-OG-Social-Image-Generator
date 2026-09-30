@@ -347,3 +347,211 @@ Chỉ trả về JSON thuần túy, không bọc trong markdown code block.
     suggestions: generateSmartFallbackHooks(topic)
   };
 }
+
+/**
+ * Phân tích nội dung link bóc tách từ mạng xã hội (TikTok, FB, Threads, Web) bằng Gemini 3.x
+ */
+export async function analyzeSocialLinkWithGemini(extractedData) {
+  const { title = '', description = '', content = '', platform = { name: 'Mạng Xã Hội' }, author = '', originalUrl = '' } = extractedData;
+  const apiKey = getStoredGeminiKey();
+  const selectedModel = getStoredGeminiModel();
+  const startTime = Date.now();
+
+  const platformName = platform?.name || 'Mạng Xã Hội';
+  const cleanTitle = title || 'Nội dung chia sẻ';
+
+  // Bộ dự phòng thông minh khi chưa có API Key
+  const generateFallbackLinkHooks = () => {
+    const pTag = platformName.toUpperCase();
+    return {
+      coreTakeaway: description || `Những bài học thực chiến và góc nhìn độc đáo được trích xuất từ ${platformName}.`,
+      author: author || platformName,
+      platform: platformName,
+      hooks: [
+        {
+          style: 'Tò Mò & Khám Phá (Curiosity Hook)',
+          headline: `Bí Ẩn Đằng Sau "${cleanTitle.slice(0, 45)}...": Sự Thật Chưa Ai Nói?`,
+          subtitle: `Phân tích chi tiết góc nhìn mới nhất từ bài đăng đang gây sốt trên ${platformName}.`,
+          categoryTag: `🔥 ${pTag} VIRAL`,
+          highlightWord: 'Bí Ẩn Đằng Sau',
+          viralityScore: '98% Viral',
+          suggestedTemplate: 'bento-grid',
+          suggestedTheme: 'indigo-cyan'
+        },
+        {
+          style: 'Thực Chiến & Hành Động (Actionable Hook)',
+          headline: `3 Bài Học Đắt Giá Bạn Cần Rút Ra Từ "${cleanTitle.slice(0, 40)}..."`,
+          subtitle: `Đúc kết kinh nghiệm then chốt giúp bạn ứng dụng ngay vào công việc và phát triển bản thân.`,
+          categoryTag: `⚡ ${pTag} ĐÚC KẾT`,
+          highlightWord: '3 Bài Học',
+          viralityScore: '95% Viral',
+          suggestedTemplate: 'saas-launch',
+          suggestedTheme: 'emerald-teal'
+        },
+        {
+          style: 'Cảnh Báo & Phản Biện (Contrarian Hook)',
+          headline: `Đừng Tin Tất Cả Về "${cleanTitle.slice(0, 45)}..." Nếu Chưa Biết Điều Này!`,
+          subtitle: `Điểm mù phổ biến và những rủi ro tiềm ẩn mà đa số người xem thường bỏ qua.`,
+          categoryTag: `⚠️ CẢNH BÁO ${pTag}`,
+          highlightWord: 'Đừng Tin',
+          viralityScore: '92% Viral',
+          suggestedTemplate: 'cyber-glitch',
+          suggestedTheme: 'sunset-amber'
+        }
+      ]
+    };
+  };
+
+  if (!apiKey) {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    return {
+      source: 'local_heuristic',
+      isRealAi: false,
+      elapsed: 600,
+      data: generateFallbackLinkHooks()
+    };
+  }
+
+  const promptText = `
+Bạn là Giám đốc Sáng tạo và Chuyên gia Tối ưu Hóa Visual Viral trên TikTok, Facebook, Threads, X và LinkedIn.
+Nhiệm vụ của bạn là phân tích sâu bài đăng/bài viết sau đây được bóc tách từ ${platformName}:
+
+URL: ${originalUrl}
+NỀN TẢNG: ${platformName}
+TÁC GIẢ / NGUỒN: ${author || 'Chưa rõ'}
+TIÊU ĐỀ GỐC: "${title}"
+MÔ TẢ GỐC: "${description}"
+TRÍCH ĐOẠN NỘI DUNG:
+"""
+${content.slice(0, 2000)}
+"""
+
+HÃY PHÂN TÍCH VÀ TRẢ VỀ DUY NHẤT MỘT ĐỐI TƯỢNG JSON VỚI CẤU TRÚC SAU:
+{
+  "coreTakeaway": "1 câu đúc kết cốt lõi sâu sắc nhất của bài viết này (dưới 110 ký tự tiếng Việt)",
+  "author": "Tên tác giả hoặc kênh/trang (ngắn gọn, ví dụ: @username hoặc tên tổ chức)",
+  "platform": "${platformName}",
+  "hooks": [
+    {
+      "style": "Tò Mò & Khám Phá (Curiosity Hook)",
+      "headline": "Tiêu đề giật tít đánh vào tâm lý tò mò, mở khoảng trống thông tin (dưới 70 ký tự tiếng Việt)",
+      "subtitle": "Phụ đề kích thích bấm đọc, tóm lược giá trị (dưới 120 ký tự tiếng Việt)",
+      "categoryTag": "Tag ngắn kèm emoji, ví dụ: '🔥 ${platformName.toUpperCase()} VIRAL' hoặc '⚡ INSIGHT'",
+      "highlightWord": "Đúng 1-3 từ khóa đắt giá nhất trong headline cần phát sáng nổi bật",
+      "viralityScore": "Điểm dự đoán lan truyền (ví dụ: '98% Viral')",
+      "suggestedTemplate": "Chọn 1 trong các ID: 'saas-launch', 'cyber-glitch', 'bento-grid', 'dev-terminal', 'clean-editorial', 'quote-focus', 'podcast-minimal', 'floating-3d', 'handcrafted-note'",
+      "suggestedTheme": "Chọn 1 trong các ID: 'indigo-cyan', 'fuchsia-rose', 'emerald-teal', 'sunset-amber', 'monochrome-dark', 'cyber-emerald'"
+    },
+    {
+      "style": "Thực Chiến & Hành Động (Actionable Hook)",
+      "headline": "Tiêu đề mang tính cẩm nang, bước làm, công thức hoặc số liệu cụ thể (dưới 70 ký tự tiếng Việt)",
+      "subtitle": "Phụ đề giải thích ứng dụng thực tế (dưới 120 ký tự tiếng Việt)",
+      "categoryTag": "Tag ngắn kèm emoji",
+      "highlightWord": "Từ khóa điểm nhấn",
+      "viralityScore": "Điểm dự đoán lan truyền (ví dụ: '95% Viral')",
+      "suggestedTemplate": "Chọn 1 ID template",
+      "suggestedTheme": "Chọn 1 ID theme"
+    },
+    {
+      "style": "Cảnh Báo & Phản Biện (Contrarian Hook)",
+      "headline": "Tiêu đề cảnh báo sai lầm, phản biện số đông hoặc góc nhìn ngược chiều (dưới 70 ký tự tiếng Việt)",
+      "subtitle": "Phụ đề nêu lý do rủi ro hoặc điều cần né tránh (dưới 120 ký tự tiếng Việt)",
+      "categoryTag": "Tag cảnh báo kèm emoji",
+      "highlightWord": "Từ khóa điểm nhấn",
+      "viralityScore": "Điểm dự đoán lan truyền (ví dụ: '93% Viral')",
+      "suggestedTemplate": "Chọn 1 ID template",
+      "suggestedTheme": "Chọn 1 ID theme"
+    }
+  ]
+}
+
+Chỉ trả về JSON thuần túy, tuyệt đối không bọc trong markdown code block.
+`;
+
+  const MODEL_FALLBACK_CANDIDATES = [
+    selectedModel,
+    'gemini-3.5-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-3.7-flash',
+    'gemini-3.6-flash'
+  ].filter((m, idx, arr) => arr.indexOf(m) === idx);
+
+  let lastError = null;
+  let failedInitialModel = null;
+
+  for (let i = 0; i < MODEL_FALLBACK_CANDIDATES.length; i++) {
+    const currentModel = MODEL_FALLBACK_CANDIDATES[i];
+    const isFallback = i > 0;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: promptText }]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.75
+          }
+        })
+      });
+
+      const elapsed = Date.now() - startTime;
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) throw new Error('Mô hình AI không trả về nội dung.');
+
+        const parsed = JSON.parse(rawText);
+        if (!parsed.hooks || !Array.isArray(parsed.hooks)) {
+          throw new Error('Định dạng dữ liệu hooks từ AI không khớp.');
+        }
+
+        console.log(`🤖 [Gemini Social Link AI] Phân tích thành công từ mô hình "${currentModel}" trong ${elapsed}ms:`, parsed);
+
+        return {
+          source: currentModel,
+          model: currentModel,
+          isRealAi: true,
+          isFallback,
+          fallbackFrom: isFallback ? selectedModel : null,
+          elapsed,
+          data: parsed
+        };
+      }
+
+      const errorData = await response.json().catch(() => ({}));
+      lastError = errorData.error?.message || `Lỗi HTTP ${response.status}`;
+      failedInitialModel = currentModel;
+      console.warn(`[Gemini Social Link AI] ${currentModel} lỗi (${response.status}): ${lastError}. Đang chuyển tiếp...`);
+
+      if (response.status === 400 && lastError.includes('API_KEY_INVALID')) {
+        break;
+      }
+      if (response.status !== 503 && response.status !== 429 && response.status !== 404) {
+        break;
+      }
+    } catch (err) {
+      lastError = err.message;
+      failedInitialModel = currentModel;
+    }
+  }
+
+  const elapsed = Date.now() - startTime;
+  return {
+    source: 'local_heuristic_after_error',
+    isRealAi: false,
+    errorMsg: lastError,
+    failedModel: failedInitialModel || selectedModel,
+    elapsed,
+    data: generateFallbackLinkHooks()
+  };
+}
