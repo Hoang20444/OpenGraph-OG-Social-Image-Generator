@@ -8,6 +8,7 @@ import CoffeeModal from './components/CoffeeModal';
 import MetaTagsModal from './components/MetaTagsModal';
 import BatchExportModal from './components/BatchExportModal';
 import SavedDesignsModal from './components/SavedDesignsModal';
+import AiAssistantModal from './components/AiAssistantModal';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
 import { COLOR_THEMES } from './data/templates';
 import { encodeConfigToUrl, decodeConfigFromUrl } from './utils/magicFetcher';
@@ -78,6 +79,7 @@ export default function App() {
   const [isMetaOpen, setIsMetaOpen] = useState(false);
   const [isBatchOpen, setIsBatchOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
+  const [isAiOpen, setIsAiOpen] = useState(false);
 
   // Toast Notification System
   const [toasts, setToasts] = useState([]);
@@ -259,6 +261,7 @@ export default function App() {
         savedCount={savedDesigns.length}
         onResetConfig={handleResetConfig}
         isPro={isPro}
+        onOpenAi={() => setIsAiOpen(true)}
       />
 
       {/* Main Studio Body */}
@@ -271,6 +274,7 @@ export default function App() {
           isPro={isPro}
           onShufflePalette={handleShufflePalette}
           onNotify={addNotification}
+          onOpenAi={() => setIsAiOpen(true)}
         />
 
         {/* Center / Right Canvas Area */}
@@ -330,6 +334,13 @@ export default function App() {
         onLoadDesign={handleLoadSavedDesign}
         onDeleteDesign={handleDeleteSavedDesign}
         onSaveCurrent={handleSaveCurrentDesign}
+      />
+
+      <AiAssistantModal
+        isOpen={isAiOpen}
+        onClose={() => setIsAiOpen(false)}
+        onApplyHook={(hookConfig) => setConfig((prev) => ({ ...prev, ...hookConfig }))}
+        onNotify={addNotification}
       />
 
       {/* Toast Notification Container */}

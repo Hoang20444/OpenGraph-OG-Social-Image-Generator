@@ -24,7 +24,8 @@ export default function Header({
   onOpenSaved,
   savedCount = 0,
   onResetConfig,
-  isPro 
+  isPro,
+  onOpenAi 
 }) {
   return (
     <header className="glass-panel" style={{ 
@@ -128,6 +129,24 @@ export default function Header({
 
         {/* Right Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* AI Hook Assistant */}
+          <button
+            onClick={onOpenAi}
+            className="btn-secondary"
+            style={{ 
+              fontSize: '13px', 
+              padding: '7px 13px',
+              color: '#ffffff',
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(236, 72, 153, 0.25))',
+              borderColor: 'rgba(236, 72, 153, 0.4)',
+              boxShadow: '0 0 15px rgba(99, 102, 241, 0.2)'
+            }}
+            title="Dùng Google Gemini 1.5 Flash AI tự động viết Hook triệu view"
+          >
+            <Sparkles size={14} color="#f472b6" />
+            <span style={{ fontWeight: 700 }}>Trợ Lý AI Hook</span>
+          </button>
+
           {/* My Saved Designs */}
           <button
             onClick={onOpenSaved}

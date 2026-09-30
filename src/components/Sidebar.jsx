@@ -67,7 +67,8 @@ export default function Sidebar({
   onOpenPro,
   isPro,
   onShufflePalette,
-  onNotify
+  onNotify,
+  onOpenAi
 }) {
   const [activeTab, setActiveTab] = useState('trends'); // 'trends' | 'templates' | 'content' | 'styling' | 'pro'
   const [magicUrl, setMagicUrl] = useState('');
@@ -295,6 +296,31 @@ export default function Sidebar({
               >
                 <RefreshCw size={12} className={isRefreshingTrends ? 'animate-spin' : ''} />
                 <span>{isRefreshingTrends ? 'Đang chạy ETL Pipeline quét dữ liệu...' : 'Làm Mới Tốc Độ Tăng Trưởng (Live Refresh)'}</span>
+              </button>
+
+              <button
+                onClick={onOpenAi}
+                style={{
+                  width: '100%',
+                  marginTop: '8px',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(236, 72, 153, 0.4)',
+                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(236, 72, 153, 0.25))',
+                  color: '#ffffff',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 10px rgba(236, 72, 153, 0.2)',
+                  transition: 'all 0.15s'
+                }}
+              >
+                <Sparkles size={13} color="#f472b6" />
+                <span>Bạn có chủ đề riêng? Để AI tự sinh 3 Hook triệu view 🪄</span>
               </button>
             </div>
 
@@ -719,7 +745,29 @@ export default function Sidebar({
             {/* Title */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label className="input-label">Tiêu đề chính (Headline)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label className="input-label" style={{ margin: 0 }}>Tiêu đề chính (Headline)</label>
+                  <button
+                    type="button"
+                    onClick={onOpenAi}
+                    style={{
+                      background: 'rgba(236, 72, 153, 0.15)',
+                      border: '1px solid rgba(236, 72, 153, 0.3)',
+                      color: '#f472b6',
+                      borderRadius: '4px',
+                      padding: '2px 7px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                    title="Mở Trợ lý AI viết tít & hook triệu view"
+                  >
+                    <Sparkles size={11} /> AI Viết Tít
+                  </button>
+                </div>
                 <span style={{ 
                   fontSize: '11px', 
                   color: config.title.length > 70 ? 'var(--color-warning)' : 'var(--text-dim)' 
