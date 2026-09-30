@@ -72,7 +72,7 @@ export default function Header({
             <div style={{ fontSize: '12px', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ fontWeight: 600, color: '#f8fafc' }}>TinyForge</span>
               <span>•</span>
-              <span style={{ color: 'var(--text-muted)' }}>Crafted with ❤️ by a Solo Dev</span>
+              <span style={{ color: 'var(--text-muted)' }}>Công cụ tạo ảnh bìa mạng xã hội chuyên nghiệp</span>
               <span>•</span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#10b981' }}>
                 <Zap size={11} /> 100% Client-Side
@@ -94,7 +94,7 @@ export default function Header({
           maxWidth: '520px'
         }}>
           <span style={{ fontSize: '11px', color: 'var(--text-dim)', paddingLeft: '8px', textTransform: 'uppercase', fontWeight: 600 }}>
-            Presets:
+            Mẫu nhanh:
           </span>
           {QUICK_PRESETS.map((preset, idx) => (
             <button
@@ -164,10 +164,10 @@ export default function Header({
               color: '#34d399',
               borderColor: 'rgba(16, 185, 129, 0.3)'
             }}
-            title="Batch generation & download all as ZIP"
+            title="Tạo ảnh hàng loạt theo danh sách và tải file ZIP"
           >
             <Layers size={14} />
-            <span>Batch ZIP</span>
+            <span>Tạo hàng loạt (ZIP)</span>
           </button>
 
           {/* Share Design Link */}
@@ -175,10 +175,10 @@ export default function Header({
             onClick={onShareDesign}
             className="btn-secondary"
             style={{ fontSize: '13px', padding: '7px 12px' }}
-            title="Share this design via link"
+            title="Sao chép liên kết chia sẻ mẫu thiết kế này"
           >
             <Share2 size={14} />
-            <span>Share</span>
+            <span>Chia sẻ</span>
           </button>
 
           {/* Get Meta Tags */}
@@ -186,10 +186,10 @@ export default function Header({
             onClick={onOpenMeta}
             className="btn-secondary"
             style={{ fontSize: '13px', padding: '7px 12px' }}
-            title="Generate HTML and Next.js <meta> tags"
+            title="Xem và sao chép thẻ <meta> OpenGraph cho HTML và Next.js"
           >
             <Code2 size={14} />
-            <span>Meta Tags</span>
+            <span>Thẻ Meta SEO</span>
           </button>
 
           {/* Buy Me a Coffee */}
@@ -202,10 +202,10 @@ export default function Header({
               color: '#f59e0b',
               borderColor: 'rgba(245, 158, 11, 0.25)' 
             }}
-            title="Support indie developer with a coffee"
+            title="Ủng hộ tác giả một ly cà phê qua Buy Me a Coffee"
           >
             <Coffee size={15} />
-            <span>Tip $3</span>
+            <span>Ủng hộ $3</span>
           </button>
 
           {/* PRO Pack Button */}
@@ -235,12 +235,12 @@ export default function Header({
             {isPro ? (
               <>
                 <CheckCircle2 size={16} />
-                <span>PRO Active</span>
+                <span>Gói PRO Hoạt Động</span>
               </>
             ) : (
               <>
                 <Crown size={16} />
-                <span>Unlock PRO</span>
+                <span>Nâng Cấp PRO</span>
               </>
             )}
           </button>

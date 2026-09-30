@@ -12,7 +12,7 @@ export default function BatchExportModal({
   onNotify
 }) {
   const [titlesText, setTitlesText] = useState(
-    `Cách kiếm 1000$ đầu tiên từ việc làm Web Tool độc lập\nTop 7 công cụ AI giúp Freelance Developer nhân đôi năng suất\nChiến lược SEO & OpenGraph tối ưu tỉ lệ click mạng xã hội\nHướng dẫn xây dựng SaaS không cần Backend từ A đến Z\nTối ưu UI/UX để giữ chân người dùng trong 5 giây đầu tiên`
+    `Bí quyết xây dựng thương hiệu cá nhân thu hút 10.000 người theo dõi\nChiến lược tối ưu hình ảnh mạng xã hội giúp tăng gấp đôi lượt click\nTop xu hướng thiết kế và sáng tạo nội dung dẫn đầu năm 2026\nLộ trình phát triển sản phẩm tinh gọn từ ý tưởng đến thực thi\nNghệ thuật kể chuyện (Storytelling) giúp giữ chân độc giả`
   );
   const [selectedTemplate, setSelectedTemplate] = useState(config.templateId);
   const [cycleTemplates, setCycleTemplates] = useState(false);
@@ -168,10 +168,10 @@ export default function BatchExportModal({
           </div>
           <div>
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>
-              Batch Generator & ZIP Export
+              Tạo Ảnh Hàng Loạt & Đóng Gói ZIP
             </h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Nhập danh sách tiêu đề và xuất toàn bộ ảnh cùng lúc chỉ với 1 click ($0 Free)
+              Nhập danh sách tiêu đề để tự động tạo và tải về toàn bộ ảnh cùng lúc (Tối ưu cho bài viết mạng xã hội, blog & podcast)
             </p>
           </div>
         </div>

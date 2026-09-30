@@ -128,10 +128,10 @@ export default function Sidebar({
         zIndex: 20
       }}>
         {[
-          { id: 'templates', label: 'Layouts', icon: LayoutTemplate },
-          { id: 'content', label: 'Content', icon: Type },
-          { id: 'styling', label: 'Themes', icon: Palette },
-          { id: 'pro', label: 'Pro Pack', icon: Crown }
+          { id: 'templates', label: 'Giao diện', icon: LayoutTemplate },
+          { id: 'content', label: 'Nội dung', icon: Type },
+          { id: 'styling', label: 'Màu & Font', icon: Palette },
+          { id: 'pro', label: 'Gói PRO', icon: Crown }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -169,7 +169,7 @@ export default function Sidebar({
             {/* Aspect Ratio Picker */}
             <div>
               <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Ratio size={14} /> Aspect Ratio & Canvas Size
+                <Ratio size={14} /> Tỉ Lệ Khung Hình & Kích Thước
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
                 {ASPECT_RATIOS.map((r) => {
@@ -205,9 +205,9 @@ export default function Sidebar({
             {/* Template Cards */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label className="input-label">Select Template Engine</label>
+                <label className="input-label">Bộ Sưu Tập Mẫu (Template Engine)</label>
                 <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: 700 }}>
-                  {TEMPLATES.length} Templates (Live)
+                  {TEMPLATES.length} Mẫu Sẵn Sàng
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -300,7 +300,7 @@ export default function Sidebar({
         {/* TAB 2: CONTENT & COPY */}
         {activeTab === 'content' && (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            {/* Magic URL Auto-Fill Box ($0 Free) */}
+            {/* Magic URL Auto-Fill Box */}
             <div style={{
               background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)',
               border: '1px solid rgba(99, 102, 241, 0.3)',
@@ -312,7 +312,7 @@ export default function Sidebar({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Sparkles size={14} color="#818cf8" />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff' }}>
-                    Magic URL Auto-Fill
+                    Bóc Tách Dữ Liệu Tự Động (Magic URL)
                   </span>
                 </div>
                 <span style={{
@@ -325,13 +325,13 @@ export default function Sidebar({
                   color: '#34d399',
                   border: '1px solid rgba(16, 185, 129, 0.3)'
                 }}>
-                  $0 FREE
+                  MIỄN PHÍ
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="url"
-                  placeholder="Paste article or GitHub link..."
+                  placeholder="Dán link bài viết, blog, Substack, Dev.to, GitHub..."
                   value={magicUrl}
                   onChange={(e) => setMagicUrl(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleMagicFetch()}
@@ -355,30 +355,30 @@ export default function Sidebar({
                   {isLoadingMagic ? (
                     <>
                       <Loader2 size={13} className="spin" />
-                      <span>Fetching...</span>
+                      <span>Đang lấy...</span>
                     </>
                   ) : (
                     <>
                       <Sparkles size={13} />
-                      <span>Auto-Fill</span>
+                      <span>Tự Điền</span>
                     </>
                   )}
                 </button>
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>
-                Supports Medium, Substack, Dev.to, GitHub repos & personal blogs
+                Hỗ trợ Medium, Substack, Dev.to, GitHub và các bài viết có gắn thẻ OpenGraph chuẩn
               </div>
             </div>
 
             {/* Title */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label className="input-label">Headline / Title</label>
+                <label className="input-label">Tiêu đề chính (Headline)</label>
                 <span style={{ 
                   fontSize: '11px', 
                   color: config.title.length > 70 ? 'var(--color-warning)' : 'var(--text-dim)' 
                 }}>
-                  {config.title.length}/80 chars
+                  {config.title.length}/80 ký tự
                 </span>
               </div>
               <textarea
@@ -386,46 +386,46 @@ export default function Sidebar({
                 value={config.title}
                 onChange={(e) => handleTextChange('title', e.target.value)}
                 className="input-field font-heading"
-                placeholder="Enter compelling headline..."
+                placeholder="Nhập tiêu đề thu hút người xem..."
                 style={{ fontSize: '14px', lineHeight: '1.4', resize: 'vertical' }}
               />
             </div>
 
             {/* Subtitle */}
             <div>
-              <label className="input-label">Subtitle / Description</label>
+              <label className="input-label">Mô tả phụ (Subtitle / Hook)</label>
               <textarea
                 rows={2}
                 value={config.subtitle}
                 onChange={(e) => handleTextChange('subtitle', e.target.value)}
                 className="input-field"
-                placeholder="Brief summary or hook..."
+                placeholder="Tóm tắt nội dung ngắn gọn giúp người xem hiểu ngay giá trị..."
                 style={{ fontSize: '13px', lineHeight: '1.4', resize: 'vertical' }}
               />
             </div>
 
-            {/* Accent Highlight Word (Glow / Marker effect) */}
+            {/* Accent Highlight Word */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Highlighter size={13} color="var(--color-warning)" />
-                  <span>Highlight Accent Word</span>
+                  <span>Từ khóa làm nổi bật (Accent Glow)</span>
                 </label>
-                <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Optional</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Tùy chọn</span>
               </div>
               <input
                 type="text"
                 value={config.highlightWord || ''}
                 onChange={(e) => handleTextChange('highlightWord', e.target.value)}
                 className="input-field"
-                placeholder="e.g. 1000$ or AI (word to highlight in title)"
+                placeholder="Ví dụ: Triệu Lượt Xem hoặc AI (từ khóa sẽ được tô gradient nổi bật)"
                 style={{ fontSize: '13px' }}
               />
             </div>
 
             {/* Typography Font Family Picker */}
             <div>
-              <label className="input-label">Typography / Phông Chữ</label>
+              <label className="input-label">Phông chữ hiển thị (Typography)</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
                 {FONT_FAMILIES.map((f) => {
                   const isSelected = (config.fontFamily || 'heading') === f.id;
@@ -457,13 +457,13 @@ export default function Sidebar({
 
             {/* Category / Pill Badge */}
             <div>
-              <label className="input-label">Category / Pill Badge</label>
+              <label className="input-label">Thẻ chuyên mục / Nhãn phân loại</label>
               <input
                 type="text"
                 value={config.categoryTag}
                 onChange={(e) => handleTextChange('categoryTag', e.target.value)}
                 className="input-field"
-                placeholder="e.g. 🚀 NEW RELEASE or TUTORIAL"
+                placeholder="Ví dụ: 💡 CHIẾN LƯỢC NỘI DUNG hoặc 🚀 BẢN TIN MỚI"
                 style={{ fontSize: '13px' }}
               />
             </div>
@@ -481,30 +481,30 @@ export default function Sidebar({
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <User size={14} color="var(--color-primary)" />
                 <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  Author & Creator
+                  Tác giả & Nhà sáng tạo
                 </span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '4px' }}>Name</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '4px' }}>Tên tác giả</span>
                   <input
                     type="text"
                     value={config.authorName}
                     onChange={(e) => handleTextChange('authorName', e.target.value)}
                     className="input-field"
-                    placeholder="Alex Vance"
+                    placeholder="Hoàng Nguyễn"
                     style={{ fontSize: '12px', padding: '7px 10px' }}
                   />
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '4px' }}>Role / Handle</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '4px' }}>Chức danh / Liên hệ</span>
                   <input
                     type="text"
                     value={config.authorRole}
                     onChange={(e) => handleTextChange('authorRole', e.target.value)}
                     className="input-field"
-                    placeholder="@alexvance"
+                    placeholder="Creator & Designer"
                     style={{ fontSize: '12px', padding: '7px 10px' }}
                   />
                 </div>
@@ -513,7 +513,7 @@ export default function Sidebar({
               {/* Avatar Selector */}
               <div>
                 <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '6px' }}>
-                  Avatar Selection
+                  Chọn ảnh đại diện
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   {DEFAULT_AVATARS.map((av) => (
@@ -549,7 +549,7 @@ export default function Sidebar({
                       cursor: 'pointer',
                       color: 'var(--text-muted)'
                     }}
-                    title="Upload custom image"
+                    title="Tải ảnh đại diện từ máy tính"
                   >
                     <Upload size={14} />
                     <input
@@ -576,20 +576,20 @@ export default function Sidebar({
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Globe size={14} color="var(--color-secondary)" />
                 <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  Brand & Domain
+                  Thương hiệu & Tên miền
                 </span>
               </div>
 
               <div>
                 <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '4px' }}>
-                  Site Domain / Watermark
+                  Tên miền hiển thị / Chữ ký góc ảnh
                 </span>
                 <input
                   type="text"
                   value={config.siteUrl}
                   onChange={(e) => handleTextChange('siteUrl', e.target.value)}
                   className="input-field"
-                  placeholder="snapog.dev"
+                  placeholder="snapog.studio"
                   style={{ fontSize: '13px' }}
                 />
               </div>
@@ -597,7 +597,7 @@ export default function Sidebar({
               {/* Brand Icon Selector */}
               <div>
                 <span style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'block', marginBottom: '6px' }}>
-                  Brand Icon
+                  Biểu tượng thương hiệu
                 </span>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {BRAND_ICONS.map((item) => {
@@ -656,7 +656,7 @@ export default function Sidebar({
                   cursor: 'pointer'
                 }}
               >
-                Preset Themes
+                Bảng Màu Tuyển Chọn
               </button>
               <button
                 type="button"
@@ -673,7 +673,7 @@ export default function Sidebar({
                   cursor: 'pointer'
                 }}
               >
-                Custom Palette 🎨
+                Tự Phối Màu Riêng 🎨
               </button>
             </div>
 
@@ -681,7 +681,7 @@ export default function Sidebar({
             {!config.isCustomColor ? (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label className="input-label" style={{ margin: 0 }}>Color Gradient Theme</label>
+                  <label className="input-label" style={{ margin: 0 }}>Bảng Màu Gradient Chủ Đạo</label>
                   <button
                     type="button"
                     onClick={onShufflePalette}
@@ -695,10 +695,10 @@ export default function Sidebar({
                       color: '#f59e0b',
                       borderColor: 'rgba(245, 158, 11, 0.3)'
                     }}
-                    title="Randomize color theme"
+                    title="Đổi sang bảng màu ngẫu nhiên khác"
                   >
                     <Dices size={13} />
-                    <span>Shuffle 🎲</span>
+                    <span>Đổi màu ngẫu nhiên 🎲</span>
                   </button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
@@ -748,12 +748,12 @@ export default function Sidebar({
               }}>
                 <div style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Paintbrush size={14} color="#f59e0b" />
-                  <span>Custom Color Studio</span>
+                  <span>Phòng Phối Màu Riêng</span>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                   <div>
-                    <label className="input-label" style={{ fontSize: '10px' }}>Primary</label>
+                    <label className="input-label" style={{ fontSize: '10px' }}>Màu chính</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <input
                         type="color"
@@ -768,7 +768,7 @@ export default function Sidebar({
                   </div>
 
                   <div>
-                    <label className="input-label" style={{ fontSize: '10px' }}>Secondary</label>
+                    <label className="input-label" style={{ fontSize: '10px' }}>Màu phụ</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <input
                         type="color"
@@ -783,7 +783,7 @@ export default function Sidebar({
                   </div>
 
                   <div>
-                    <label className="input-label" style={{ fontSize: '10px' }}>Background</label>
+                    <label className="input-label" style={{ fontSize: '10px' }}>Màu nền</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <input
                         type="color"
@@ -801,7 +801,7 @@ export default function Sidebar({
                 {/* Gradient Angle Slider */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label className="input-label" style={{ margin: 0, fontSize: '11px' }}>Gradient Angle</label>
+                    <label className="input-label" style={{ margin: 0, fontSize: '11px' }}>Góc xoay Gradient</label>
                     <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
                       {config.customGradientAngle || 135}°
                     </span>
@@ -829,14 +829,14 @@ export default function Sidebar({
 
             {/* Background Texture Pattern */}
             <div>
-              <label className="input-label">Background Pattern</label>
+              <label className="input-label">Họa tiết nền (Texture Pattern)</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 {[
-                  { id: 'dots', label: 'Dot Matrix' },
-                  { id: 'grid', label: 'Tech Grid' },
-                  { id: 'glow', label: 'Radial Glow' },
-                  { id: 'mesh', label: 'Mesh Blur' },
-                  { id: 'clean', label: 'Solid Clean' }
+                  { id: 'dots', label: 'Chấm bi (Dots)' },
+                  { id: 'grid', label: 'Lưới (Grid)' },
+                  { id: 'glow', label: 'Tỏa sáng (Glow)' },
+                  { id: 'mesh', label: 'Mờ màu (Mesh)' },
+                  { id: 'clean', label: 'Màu phẳng (Clean)' }
                 ].map((pat) => {
                   const isSelected = config.pattern === pat.id;
                   return (
@@ -863,7 +863,7 @@ export default function Sidebar({
             {/* Typography Scale Slider */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label className="input-label" style={{ margin: 0 }}>Title Size</label>
+                <label className="input-label" style={{ margin: 0 }}>Cỡ chữ tiêu đề (Font Size)</label>
                 <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                   {config.fontSize}px
                 </span>
@@ -881,26 +881,28 @@ export default function Sidebar({
 
             {/* Text Alignment */}
             <div>
-              <label className="input-label">Text Alignment</label>
+              <label className="input-label">Căn lề văn bản</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {['left', 'center'].map((align) => {
-                  const isSelected = config.align === align;
+                {[
+                  { id: 'left', label: 'Căn trái' },
+                  { id: 'center', label: 'Căn giữa' }
+                ].map((item) => {
+                  const isSelected = config.align === item.id;
                   return (
                     <button
-                      key={align}
-                      onClick={() => onChange({ ...config, align })}
+                      key={item.id}
+                      onClick={() => onChange({ ...config, align: item.id })}
                       style={{
                         padding: '8px',
                         borderRadius: '6px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        textTransform: 'capitalize',
                         background: isSelected ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.03)',
                         color: isSelected ? '#ffffff' : 'var(--text-dim)',
                         border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--border-subtle)'
                       }}
                     >
-                      {align} Align
+                      {item.label}
                     </button>
                   );
                 })}
@@ -911,7 +913,7 @@ export default function Sidebar({
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <label className="input-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Box size={14} color="var(--color-primary)" /> 3D Perspective Tilt
+                  <Box size={14} color="var(--color-primary)" /> Góc nghiêng không gian 3D
                 </label>
                 <button
                   onClick={() => onChange({ ...config, tilt3D: !config.tilt3D })}
@@ -925,18 +927,18 @@ export default function Sidebar({
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  {config.tilt3D ? 'ON (Active)' : 'OFF'}
+                  {config.tilt3D ? 'ĐANG BẬT' : 'ĐANG TẮT'}
                 </button>
               </div>
               <p style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                Tạo góc nghiêng 3D không gian cho thẻ bài, tạo chiều sâu thị giác chân thực.
+                Tạo góc nghiêng 3D không gian cho ảnh thẻ, tăng chiều sâu thị giác chân thực.
               </p>
             </div>
 
             {/* Stickers / Human Badges */}
             <div>
               <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Tag size={14} color="#f59e0b" /> Human Sticker Badge
+                <Tag size={14} color="#f59e0b" /> Nhãn dán thu hút (Stickers)
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {STICKERS.map((stk) => {
@@ -966,7 +968,7 @@ export default function Sidebar({
             {/* Card Border Radius Slider */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label className="input-label" style={{ margin: 0 }}>Border Radius (Bo góc)</label>
+                <label className="input-label" style={{ margin: 0 }}>Độ bo góc khung hình (Border Radius)</label>
                 <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                   {config.borderRadius ?? 16}px
                 </span>
@@ -985,7 +987,7 @@ export default function Sidebar({
             {/* Canvas Inner Padding Slider */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label className="input-label" style={{ margin: 0 }}>Inner Padding (Đệm lề)</label>
+                <label className="input-label" style={{ margin: 0 }}>Khoảng đệm nội dung (Inner Padding)</label>
                 <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                   {config.padding ?? 60}px
                 </span>
@@ -1003,13 +1005,13 @@ export default function Sidebar({
 
             {/* Shadow Depth Selector */}
             <div>
-              <label className="input-label">Shadow Depth (Bóng đổ)</label>
+              <label className="input-label">Độ sâu bóng đổ (Shadow Depth)</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                 {[
-                  { id: 'none', label: 'None' },
-                  { id: 'soft', label: 'Soft' },
-                  { id: 'medium', label: 'Deep' },
-                  { id: 'glow', label: 'Glow' }
+                  { id: 'none', label: 'Không' },
+                  { id: 'soft', label: 'Nhẹ nhàng' },
+                  { id: 'medium', label: 'Chiều sâu' },
+                  { id: 'glow', label: 'Phát sáng' }
                 ].map((sh) => {
                   const isSelected = (config.shadowIntensity || 'medium') === sh.id;
                   return (
@@ -1047,19 +1049,19 @@ export default function Sidebar({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Crown size={20} color="#f59e0b" />
                 <span style={{ fontWeight: 800, fontSize: '16px', color: '#ffffff' }}>
-                  SnapOG PRO Lifetime
+                  Bản Quyền SnapOG PRO Trọn Đời
                 </span>
               </div>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                Unlock all premium templates, batch CSV social card creation, custom SVG exports, and priority features for a one-time payment.
+                Mở khóa toàn bộ 15+ mẫu thiết kế độc quyền, công cụ tạo hàng loạt ảnh từ CSV, xuất file 4K siêu nét và nhận mọi bản cập nhật tính năng mới trọn đời.
               </p>
 
               <div style={{ margin: '14px 0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-                  '15+ Exclusive Design Engines',
-                  'Batch CSV Generation (20+ cards in 1s)',
-                  'Custom Font & SVG Vector Export',
-                  'Remove Watermarks & Unlimited Downloads'
+                  '15+ Mẫu thiết kế chuyên nghiệp độc quyền (Podcast, Cyberpunk HUD...)',
+                  'Tạo hàng chục ảnh cùng lúc từ danh sách CSV/Text',
+                  'Xuất ảnh độ phân giải siêu nét 4K / 3X Retina',
+                  'Tùy chỉnh Logo & Watermark thương hiệu cá nhân không giới hạn'
                 ].map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: '#f8fafc' }}>
                     <Check size={13} color="#10b981" />
@@ -1081,7 +1083,7 @@ export default function Sidebar({
                   boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)'
                 }}
               >
-                {isPro ? 'Manage PRO Membership' : 'Upgrade for $9 / 49.000₫'}
+                {isPro ? 'Quản Lý Quyền Lợi VIP PRO' : 'Nâng Cấp PRO Trọn Đời (49.000₫ / $9)'}
               </button>
             </div>
 
@@ -1092,10 +1094,10 @@ export default function Sidebar({
               padding: '14px'
             }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
-                💡 Solopreneur Monetization Stack:
+                💡 Cam kết bản quyền từ TinyForge Studio:
               </span>
               <p style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: '1.5' }}>
-                This is a live working demonstration of how you can integrate **Gumroad / Lemon Squeezy** (International USD) and **VietQR / PayOS** (Vietnam VND) with $0 upfront cost!
+                Thanh toán một lần duy nhất, sở hữu mãi mãi. Mã bản quyền có thể kích hoạt lại trên mọi thiết bị mới của bạn mà không phát sinh bất kỳ chi phí duy trì nào.
               </p>
             </div>
           </div>

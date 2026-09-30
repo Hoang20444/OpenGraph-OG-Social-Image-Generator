@@ -13,19 +13,19 @@ import { COLOR_THEMES } from './data/templates';
 import { encodeConfigToUrl, decodeConfigFromUrl } from './utils/magicFetcher';
 
 const DEFAULT_CONFIG = {
-  title: 'Cách kiếm 1000$ đầu tiên với tư cách là một Fresher độc lập',
-  subtitle: 'Hướng dẫn chi tiết tự tay làm sản phẩm web & tool từ 0 đồng, không cần backend, tối ưu hoá chuyển đổi và dòng tiền.',
-  categoryTag: '🚀 HƯỚNG DẪN THỰC CHIẾN',
-  authorName: 'Nguyen Van A',
-  authorRole: 'Fresher Developer & Indie Hacker',
-  siteUrl: 'snapog.dev',
+  title: 'Bí quyết xây dựng thương hiệu & nội dung thu hút triệu lượt xem',
+  subtitle: 'Cẩm nang thực chiến giúp bạn tối ưu hóa hình ảnh mạng xã hội, tăng tỉ lệ nhấp chuột (CTR) và tạo ấn tượng khó phai với độc giả.',
+  categoryTag: '💡 CHIẾN LƯỢC NỘI DUNG',
+  authorName: 'Hoàng Nguyễn',
+  authorRole: 'Product Creator & Designer',
+  siteUrl: 'snapog.studio',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
   brandIcon: 'sparkles',
   themeId: 'indigo-cyan',
   templateId: 'saas-launch',
   aspectRatio: '1200x630',
   pattern: 'dots',
-  fontSize: 50,
+  fontSize: 48,
   align: 'left',
   padding: 60,
   borderRadius: 16,
@@ -33,7 +33,7 @@ const DEFAULT_CONFIG = {
   tilt3D: false,
   sticker: 'none',
   fontFamily: 'heading',
-  highlightWord: '1000$',
+  highlightWord: 'triệu lượt xem',
   isCustomColor: false,
   customPrimary: '#6366f1',
   customSecondary: '#06b6d4',
@@ -155,7 +155,7 @@ export default function App() {
       templateId: preset.template,
       themeId: preset.theme
     }));
-    addNotification(`✨ Applied preset: ${preset.name}`);
+    addNotification(`✨ Đã áp dụng mẫu: ${preset.name}`);
   };
 
   // Shuffle Magic Color Palette

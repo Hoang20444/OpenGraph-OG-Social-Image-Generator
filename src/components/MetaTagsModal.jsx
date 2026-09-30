@@ -99,14 +99,14 @@ export default function Page() {
   const handleCopy = () => {
     navigator.clipboard.writeText(currentSnippet);
     setCopied(true);
-    onNotify('📋 Meta tags snippet copied to clipboard!');
+    onNotify('📋 Đã sao chép đoạn mã thẻ meta vào bộ nhớ tạm!');
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="glass-panel"
+        className="glass-panel" 
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -131,7 +131,7 @@ export default function Page() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Code2 size={20} color="var(--color-primary)" />
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>
-              Generated Social & OpenGraph &lt;meta&gt; Tags
+              Mã Thẻ &lt;meta&gt; OpenGraph & SEO Mạng Xã Hội
             </h3>
           </div>
           <button
@@ -155,7 +155,7 @@ export default function Page() {
           borderBottom: '1px solid var(--border-subtle)'
         }}>
           {[
-            { id: 'html', label: 'Standard HTML' },
+            { id: 'html', label: 'Mã HTML Chuẩn' },
             { id: 'nextjs-app', label: 'Next.js (App Router)' },
             { id: 'nextjs-pages', label: 'Next.js (Pages Router)' }
           ].map((tab) => (
@@ -206,7 +206,7 @@ export default function Page() {
             }}
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            <span>{copied ? 'Copied!' : 'Copy Code'}</span>
+            <span>{copied ? 'Đã sao chép!' : 'Sao chép mã'}</span>
           </button>
         </div>
       </div>

@@ -238,7 +238,7 @@ export default function ExportToolbar({
         style={{ fontSize: '13px', padding: '8px 14px', color: 'var(--color-secondary)' }}
       >
         <Code2 size={15} />
-        <span>&lt;meta&gt; Tags</span>
+        <span>Thẻ Meta SEO</span>
       </button>
     </div>
   );

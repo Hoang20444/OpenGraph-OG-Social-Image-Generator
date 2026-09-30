@@ -260,7 +260,7 @@ export default function CanvasPreview({
             }}
           >
             <Eye size={14} />
-            <span>Single Canvas</span>
+            <span>Chế Độ Thiết Kế</span>
           </button>
           <button
             type="button"
@@ -281,7 +281,7 @@ export default function CanvasPreview({
             }}
           >
             <LayoutGrid size={14} />
-            <span>Instant Gallery</span>
+            <span>Thư Viện Mẫu</span>
             <span style={{
               fontSize: '9px',
               fontWeight: 800,
@@ -290,7 +290,7 @@ export default function CanvasPreview({
               background: viewMode === 'gallery' ? '#ffffff' : 'rgba(16, 185, 129, 0.25)',
               color: viewMode === 'gallery' ? '#0f172a' : '#34d399'
             }}>
-              11 LIVE
+              11 MẪU
             </span>
           </button>
         </div>
@@ -299,9 +299,9 @@ export default function CanvasPreview({
         {viewMode === 'single' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {[
-              { id: 'raw', label: 'Raw Canvas' },
-              { id: 'twitter', label: 'Twitter / X Card' },
-              { id: 'facebook', label: 'LinkedIn / Facebook Feed' }
+              { id: 'raw', label: 'Khung gốc (1200×630)' },
+              { id: 'twitter', label: 'Xem trước Twitter / X' },
+              { id: 'facebook', label: 'Xem trước Facebook / LinkedIn' }
             ].map((item) => (
               <button
                 key={item.id}
@@ -323,10 +323,10 @@ export default function CanvasPreview({
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {[
-              { id: 'all', label: 'All (11)' },
-              { id: 'human', label: '✍️ Human Craft (3)' },
-              { id: 'tech', label: '⚡ 3D & Tech (5)' },
-              { id: 'editorial', label: '📰 Editorial (3)' }
+              { id: 'all', label: 'Tất cả (11)' },
+              { id: 'human', label: '✍️ Ghi chú & Cảm xúc (3)' },
+              { id: 'tech', label: '⚡ Công nghệ & UI (5)' },
+              { id: 'editorial', label: '📰 Báo chí & Độc bản (3)' }
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -374,7 +374,7 @@ export default function CanvasPreview({
                   color: zoom === 'fit' ? '#ffffff' : 'var(--text-muted)'
                 }}
               >
-                Fit
+                Vừa khung
               </button>
               <button
                 onClick={() => setZoom(0.5)}

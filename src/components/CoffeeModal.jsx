@@ -68,10 +68,10 @@ export default function CoffeeModal({
             </div>
             <div>
               <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#ffffff' }}>
-                Buy the Maker a Coffee
+                Mời TinyForge Một Ly Cà Phê
               </h3>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Support free & open-source indie tools
+                Đồng hành và tiếp thêm động lực cho công cụ sáng tạo miễn phí
               </div>
             </div>
           </div>
@@ -91,18 +91,18 @@ export default function CoffeeModal({
         {/* Body */}
         <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-            Hi! I am a fresh IT graduate building independent software in my spare time. 
-            If SnapOG saved you 30 minutes in Figma, consider buying me a coffee to keep the servers running! ☕
+            Chào bạn! SnapOG Studio được xây dựng với mong muốn mang lại một công cụ tạo ảnh mạng xã hội trực quan, tốc độ cao và hoàn toàn miễn phí cho cộng đồng sáng tạo nội dung. 
+            Nếu ứng dụng này giúp bạn tiết kiệm thời gian, một ly cà phê ấm áp từ bạn sẽ là nguồn động viên vô cùng to lớn! ☕
           </p>
 
           {/* Amount Pills */}
           <div>
-            <label className="input-label">Select tip amount</label>
+            <label className="input-label">Chọn mức ủng hộ tùy tâm</label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {[
-                { amount: 3, label: '1 Coffee ($3)' },
-                { amount: 5, label: '2 Coffees ($5)' },
-                { amount: 10, label: 'Pizza 🍕 ($10)' }
+                { amount: 3, label: '1 Ly Cà Phê ($3)' },
+                { amount: 5, label: '2 Ly Cà Phê ($5)' },
+                { amount: 10, label: 'Bữa Ăn Trưa 🍕 ($10)' }
               ].map((item) => (
                 <button
                   key={item.amount}
@@ -145,7 +145,7 @@ export default function CoffeeModal({
             {isThanked ? (
               <>
                 <Check size={18} />
-                <span>Thank you so much! ❤️</span>
+                <span>Cảm ơn bạn rất nhiều! ❤️</span>
               </>
             ) : (
               <>
@@ -185,7 +185,7 @@ export default function CoffeeModal({
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            Tất cả thông tin tài khoản và mã QR có thể tùy chỉnh trong file <strong>src/data/paymentConfig.js</strong>!
+            Mọi sự đóng góp của bạn đều trực tiếp hỗ trợ duy trì và phát triển thêm các tính năng mới cho cộng đồng!
           </div>
         </div>
       </div>
