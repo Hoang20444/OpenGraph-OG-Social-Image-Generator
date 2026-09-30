@@ -21,7 +21,8 @@ import {
   getStoredGeminiModel,
   saveStoredGeminiModel,
   AVAILABLE_MODELS,
-  generateAiSocialHooks 
+  generateAiSocialHooks,
+  testGeminiConnection
 } from '../utils/geminiAi';
 
 const QUICK_IDEAS = [
@@ -41,12 +42,15 @@ export default function AiAssistantModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [engineSource, setEngineSource] = useState('');
+  const [lastAiMeta, setLastAiMeta] = useState(null);
   
   // API Key & Model management state
   const [apiKey, setApiKey] = useState('');
   const [selectedModel, setSelectedModel] = useState(() => getStoredGeminiModel());
   const [isConfiguringKey, setIsConfiguringKey] = useState(false);
   const [hasCustomKey, setHasCustomKey] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -70,6 +74,24 @@ export default function AiAssistantModal({
     }
   };
 
+  const handleTestConnection = async () => {
+    if (!apiKey.trim()) {
+      if (onNotify) onNotify('⚠️ Vui lòng nhập API Key để kiểm tra');
+      return;
+    }
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const res = await testGeminiConnection(apiKey, selectedModel);
+      setTestResult(res);
+      if (onNotify) {
+        onNotify(res.success ? `✅ ${res.message}` : `❌ ${res.message}`);
+      }
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   const handleGenerate = async (overrideTopic) => {
     const textToRun = (overrideTopic || topic).trim();
     if (!textToRun) {
@@ -83,9 +105,19 @@ export default function AiAssistantModal({
       const res = await generateAiSocialHooks(textToRun);
       setSuggestions(res.suggestions || []);
       setEngineSource(res.source);
+      setLastAiMeta({
+        isRealAi: res.isRealAi,
+        model: res.model || selectedModel,
+        elapsed: res.elapsed,
+        errorMsg: res.errorMsg,
+        failedModel: res.failedModel
+      });
+
       if (onNotify) {
-        if (res.source === 'gemini_1.5_flash') {
-          onNotify('✨ Google Gemini 1.5 Flash đã phân tích & tạo 3 Hook triệu view!');
+        if (res.isRealAi) {
+          onNotify(`✨ Google Gemini (${res.model}) đã phân tích & tạo 3 Hook triệu view! (${res.elapsed}ms)`);
+        } else if (res.errorMsg) {
+          onNotify(`⚠️ Google API báo lỗi (${res.failedModel}): ${res.errorMsg}`);
         } else {
           onNotify('✨ Đã tạo 3 phương án Social Hook thông minh!');
         }
@@ -335,9 +367,49 @@ export default function AiAssistantModal({
                   >
                     Lưu Cấu Hình
                   </button>
+                  <button
+                    type="button"
+                    onClick={handleTestConnection}
+                    disabled={isTesting || !apiKey.trim()}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      color: '#ffffff',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: isTesting || !apiKey.trim() ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap'
+                    }}
+                    title="Gửi yêu cầu thử nghiệm tới Google để kiểm tra API Key và Model"
+                  >
+                    {isTesting ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} color="#f59e0b" />}
+                    <span>{isTesting ? 'Đang test...' : 'Test Kết Nối'}</span>
+                  </button>
                 </div>
               </div>
             </div>
+
+            {testResult && (
+              <div style={{
+                padding: '8px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: testResult.success ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                border: testResult.success ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                color: testResult.success ? '#34d399' : '#f87171'
+              }}>
+                <Zap size={13} color={testResult.success ? '#10b981' : '#ef4444'} />
+                <span>{testResult.message}</span>
+              </div>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-dim)' }}>
               <ShieldCheck size={12} color="#10b981" />
@@ -444,6 +516,45 @@ export default function AiAssistantModal({
           {/* AI Suggestions Results */}
           {suggestions.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '6px' }}>
+              {/* Live Real AI Verification Banner */}
+              {lastAiMeta && (
+                <div style={{
+                  padding: '9px 14px',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: lastAiMeta.isRealAi ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.1)',
+                  border: lastAiMeta.isRealAi ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(245, 158, 11, 0.3)',
+                  color: lastAiMeta.isRealAi ? '#34d399' : '#fbbf24'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{
+                      width: '7px',
+                      height: '7px',
+                      borderRadius: '50%',
+                      background: lastAiMeta.isRealAi ? '#10b981' : '#f59e0b',
+                      boxShadow: lastAiMeta.isRealAi ? '0 0 8px #10b981' : 'none',
+                      display: 'inline-block'
+                    }} />
+                    <span style={{ fontWeight: 700 }}>
+                      {lastAiMeta.isRealAi 
+                        ? `XÁC THỰC: Phản hồi từ mô hình Google Gemini "${lastAiMeta.model}"` 
+                        : (lastAiMeta.errorMsg 
+                            ? `Google API báo lỗi: "${lastAiMeta.errorMsg}" -> Đã chạy bộ sinh dự phòng` 
+                            : 'Đang chạy bộ sinh thông minh cục bộ (Chưa nhập API Key)')
+                      }
+                    </span>
+                  </div>
+                  {lastAiMeta.elapsed && (
+                    <span style={{ fontSize: '10px', opacity: 0.85, fontFamily: 'monospace' }}>
+                      ⚡ {lastAiMeta.elapsed}ms
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '12px', fontWeight: 800, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   🎯 3 Phương Án Tối Ưu Độ Lan Truyền:

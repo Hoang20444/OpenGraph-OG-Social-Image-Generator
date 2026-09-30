@@ -8,10 +8,13 @@ export const STORAGE_KEY_GEMINI = 'snapog_gemini_api_key';
 export const STORAGE_KEY_MODEL = 'snapog_gemini_model';
 
 export const AVAILABLE_MODELS = [
-  { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash (Mạnh mẽ & Tối ưu hóa - Khuyên dùng)' },
+  { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Thế hệ mới nhất)' },
+  { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash (Mạnh mẽ & Cân bằng)' },
+  { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash (Tối ưu hóa phản hồi)' },
+  { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash (Mạnh mẽ & Khuyên dùng)' },
   { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash Lite (Siêu tốc & Tiết kiệm token)' },
   { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental' },
-  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Bản ổn định phổ biến)' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Bản ổn định)' },
   { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Tư duy chuyên sâu)' }
 ];
 
@@ -52,6 +55,71 @@ export function saveStoredGeminiModel(model) {
     }
   } catch (err) {
     console.error('Failed to save Gemini model:', err);
+  }
+}
+
+/**
+ * Kiểm tra kết nối thực tế tới Google Gemini API với Key và Model đã chọn
+ */
+export async function testGeminiConnection(apiKey, model) {
+  const keyToTest = apiKey || getStoredGeminiKey();
+  const modelToTest = model || getStoredGeminiModel();
+
+  if (!keyToTest || !keyToTest.trim()) {
+    return {
+      success: false,
+      message: 'Chưa có API Key. Vui lòng nhập mã API Key của bạn để kiểm tra.'
+    };
+  }
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToTest}:generateContent?key=${keyToTest.trim()}`;
+  const startTime = Date.now();
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: 'Trả về từ: OK' }]
+          }
+        ]
+      })
+    });
+
+    const elapsed = Date.now() - startTime;
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMsg = errData.error?.message || `Lỗi HTTP ${res.status}`;
+      return {
+        success: false,
+        statusCode: res.status,
+        model: modelToTest,
+        message: `Mô hình "${modelToTest}" báo lỗi (${res.status}): ${errMsg}`
+      };
+    }
+
+    const data = await res.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'OK';
+
+    return {
+      success: true,
+      statusCode: 200,
+      model: modelToTest,
+      elapsed,
+      reply,
+      message: `Kết nối thành công tới ${modelToTest}! Độ trễ phản hồi: ${elapsed}ms.`
+    };
+  } catch (err) {
+    return {
+      success: false,
+      model: modelToTest,
+      message: `Lỗi kết nối mạng: ${err.message}`
+    };
   }
 }
 
@@ -149,6 +217,7 @@ export async function generateAiSocialHooks(topic) {
   // Gọi trực tiếp Google Gemini API với model đã chọn và JSON Response Schema
   const selectedModel = getStoredGeminiModel();
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+  const startTime = Date.now();
 
   const promptText = `
 Bạn là Giám đốc Sáng tạo và Chuyên gia Viral Marketing trên TikTok, Facebook, Threads và LinkedIn.
@@ -196,13 +265,18 @@ Chỉ trả về JSON thuần túy, không bọc trong markdown code block.
       })
     });
 
+    const elapsed = Date.now() - startTime;
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const msg = errorData.error?.message || `Lỗi HTTP ${response.status}`;
-      console.warn('Gemini API call failed, falling back to smart heuristic:', msg);
+      console.warn(`[Gemini API] Lỗi từ mô hình ${selectedModel} (${response.status}):`, msg);
       return {
         source: 'local_heuristic_after_error',
+        isRealAi: false,
         errorMsg: msg,
+        failedModel: selectedModel,
+        elapsed,
         suggestions: generateSmartFallbackHooks(topic)
       };
     }
@@ -218,16 +292,24 @@ Chỉ trả về JSON thuần túy, không bọc trong markdown code block.
       throw new Error('Định dạng dữ liệu từ AI không khớp.');
     }
 
+    console.log(`🤖 [Google Gemini API] Nhận phản hồi thành công từ mô hình "${selectedModel}" trong ${elapsed}ms:`, parsed);
+
     return {
       source: selectedModel,
       model: selectedModel,
+      isRealAi: true,
+      elapsed,
       suggestions: parsed.suggestions
     };
   } catch (err) {
-    console.warn('Lỗi gọi Gemini AI, chuyển sang bộ sinh dự phòng:', err.message);
+    const elapsed = Date.now() - startTime;
+    console.warn(`[Gemini API] Lỗi kết nối tới mô hình ${selectedModel}:`, err.message);
     return {
       source: 'local_heuristic_after_error',
+      isRealAi: false,
       errorMsg: err.message,
+      failedModel: selectedModel,
+      elapsed,
       suggestions: generateSmartFallbackHooks(topic)
     };
   }
