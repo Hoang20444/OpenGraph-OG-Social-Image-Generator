@@ -141,7 +141,7 @@ export default function Header({
               borderColor: 'rgba(236, 72, 153, 0.4)',
               boxShadow: '0 0 15px rgba(99, 102, 241, 0.2)'
             }}
-            title="Dùng Google Gemini 1.5 Flash AI tự động viết Hook triệu view"
+            title="Dùng Google Gemini 3.x AI tự động viết Hook triệu view"
           >
             <Sparkles size={14} color="#f472b6" />
             <span style={{ fontWeight: 700 }}>Trợ Lý AI Hook</span>
