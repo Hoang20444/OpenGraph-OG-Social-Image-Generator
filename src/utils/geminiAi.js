@@ -8,9 +8,11 @@ export const STORAGE_KEY_GEMINI = 'snapog_gemini_api_key';
 export const STORAGE_KEY_MODEL = 'snapog_gemini_model';
 
 export const AVAILABLE_MODELS = [
-  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Khuyên dùng - Siêu tốc & Miễn phí)' },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Suy luận sâu & Viết văn tinh tế)' },
-  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental (Mô hình thế hệ mới)' }
+  { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash (Mạnh mẽ & Tối ưu hóa - Khuyên dùng)' },
+  { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash Lite (Siêu tốc & Tiết kiệm token)' },
+  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Bản ổn định phổ biến)' },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Tư duy chuyên sâu)' }
 ];
 
 export function getStoredGeminiKey() {
@@ -35,9 +37,9 @@ export function saveStoredGeminiKey(key) {
 
 export function getStoredGeminiModel() {
   try {
-    return localStorage.getItem(STORAGE_KEY_MODEL) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-1.5-flash';
+    return localStorage.getItem(STORAGE_KEY_MODEL) || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
   } catch {
-    return 'gemini-1.5-flash';
+    return 'gemini-3.5-flash';
   }
 }
 

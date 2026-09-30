@@ -44,7 +44,7 @@ export default function AiAssistantModal({
   
   // API Key & Model management state
   const [apiKey, setApiKey] = useState('');
-  const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
+  const [selectedModel, setSelectedModel] = useState(() => getStoredGeminiModel());
   const [isConfiguringKey, setIsConfiguringKey] = useState(false);
   const [hasCustomKey, setHasCustomKey] = useState(false);
 
