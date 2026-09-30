@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   Sparkles, 
   Crown, 
@@ -8,7 +7,9 @@ import {
   Layers, 
   Zap, 
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Bookmark,
+  RotateCcw
 } from 'lucide-react';
 import { QUICK_PRESETS } from '../data/templates';
 import Logo from './Logo';
@@ -20,6 +21,9 @@ export default function Header({
   onOpenMeta, 
   onShareDesign,
   onOpenBatch,
+  onOpenSaved,
+  savedCount = 0,
+  onResetConfig,
   isPro 
 }) {
   return (
@@ -124,6 +128,32 @@ export default function Header({
 
         {/* Right Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* My Saved Designs */}
+          <button
+            onClick={onOpenSaved}
+            className="btn-secondary"
+            style={{ 
+              fontSize: '13px', 
+              padding: '7px 12px',
+              color: savedCount > 0 ? '#f59e0b' : 'var(--text-muted)',
+              borderColor: savedCount > 0 ? 'rgba(245, 158, 11, 0.3)' : 'var(--border-subtle)'
+            }}
+            title="Xem và quản lý các mẫu đã lưu của bạn"
+          >
+            <Bookmark size={14} />
+            <span>Mẫu đã lưu ({savedCount})</span>
+          </button>
+
+          {/* Reset to Default */}
+          <button
+            onClick={onResetConfig}
+            className="btn-secondary"
+            style={{ fontSize: '13px', padding: '7px 10px' }}
+            title="Khôi phục lại thiết kế ban đầu"
+          >
+            <RotateCcw size={14} />
+          </button>
+
           {/* Batch Generator */}
           <button
             onClick={onOpenBatch}

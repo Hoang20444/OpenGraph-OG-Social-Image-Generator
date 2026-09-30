@@ -1,9 +1,22 @@
 // SnapOG Studio Data & Configuration
 export const ASPECT_RATIOS = [
-  { id: '1200x630', label: 'OpenGraph', desc: 'FB, LinkedIn, Discord', width: 1200, height: 630, aspect: '1200 / 630' },
-  { id: '1200x675', label: 'Twitter/X Card', desc: '16:9 Large Summary', width: 1200, height: 675, aspect: '1200 / 675' },
-  { id: '1080x1080', label: 'Square Post', desc: 'Instagram, Feed', width: 1080, height: 1080, aspect: '1 / 1' },
-  { id: '1080x1920', label: 'Story / Reel', desc: '9:16 Vertical', width: 1080, height: 1920, aspect: '1080 / 1920' },
+  { id: '1200x630', label: 'OpenGraph', desc: 'FB, LinkedIn, Discord', width: 1200, height: 630, aspect: '1200 / 630', icon: 'globe' },
+  { id: '1200x675', label: 'Twitter / X Card', desc: '16:9 Large Summary', width: 1200, height: 675, aspect: '1200 / 675', icon: 'twitter' },
+  { id: '1280x720', label: 'YouTube Thumbnail', desc: '16:9 HD Video Cover', width: 1280, height: 720, aspect: '16 / 9', icon: 'youtube' },
+  { id: '1500x500', label: 'Twitter Header', desc: '3:1 Profile Banner', width: 1500, height: 500, aspect: '3 / 1', icon: 'banner' },
+  { id: '1270x760', label: 'Product Hunt', desc: 'Gallery Showcase Card', width: 1270, height: 760, aspect: '1270 / 760', icon: 'rocket' },
+  { id: '1080x1080', label: 'Square Post', desc: 'Instagram, Feed', width: 1080, height: 1080, aspect: '1 / 1', icon: 'square' },
+  { id: '1080x1920', label: 'Story / Reel', desc: '9:16 Vertical Video', width: 1080, height: 1920, aspect: '1080 / 1920', icon: 'smartphone' }
+];
+
+export const FONT_FAMILIES = [
+  { id: 'sans', name: 'Inter Clean', fontVar: 'var(--font-sans)', desc: 'Modern & balanced' },
+  { id: 'heading', name: 'Plus Jakarta', fontVar: 'var(--font-heading)', desc: 'SaaS & startup hero' },
+  { id: 'display', name: 'Space Grotesk', fontVar: 'var(--font-display)', desc: 'Tech & crypto forward' },
+  { id: 'syne', name: 'Syne Bold', fontVar: 'var(--font-syne)', desc: 'Indie & artistic punch' },
+  { id: 'mono', name: 'JetBrains Mono', fontVar: 'var(--font-mono)', desc: 'Developer terminal code' },
+  { id: 'handwriting', name: 'Caveat Marker', fontVar: 'var(--font-handwriting)', desc: 'Warm human handwriting' },
+  { id: 'serif', name: 'Newsreader Serif', fontVar: 'var(--font-serif)', desc: 'Classic editorial journal' }
 ];
 
 export const COLOR_THEMES = [

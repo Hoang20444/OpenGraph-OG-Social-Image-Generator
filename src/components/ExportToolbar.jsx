@@ -6,7 +6,9 @@ import {
   Check, 
   Loader2, 
   Sparkles, 
-  Image as ImageIcon 
+  Image as ImageIcon,
+  Zap,
+  Layers
 } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
 import confetti from 'canvas-confetti';
@@ -19,6 +21,20 @@ export default function ExportToolbar({
 }) {
   const [isExporting, setIsExporting] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [exportScale, setExportScale] = useState(2); // 1 | 2 | 3
+  const [format, setFormat] = useState('png'); // 'png' | 'jpg' | 'webp'
+
+  // Generate clean slug for filename
+  const getCleanSlug = () => {
+    if (!config.title) return config.templateId || 'card';
+    return config.title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 35) || 'card';
+  };
 
   // Trigger celebration confetti
   const triggerConfetti = () => {
@@ -30,58 +46,42 @@ export default function ExportToolbar({
     });
   };
 
-  // Export High-Resolution PNG
-  const handleExportPNG = async () => {
+  // Primary Export Handler
+  const handleExport = async () => {
     if (!canvasRef.current || isExporting) return;
     setIsExporting(true);
 
     try {
-      // Use pixelRatio: 2 for ultra-crisp Retina display
-      const dataUrl = await htmlToImage.toPng(canvasRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-        cacheBust: true
-      });
+      const slug = getCleanSlug();
+      let dataUrl;
+      let filename;
+
+      if (format === 'jpg') {
+        filename = `snapog-${slug}-${exportScale}x.jpg`;
+        dataUrl = await htmlToImage.toJpeg(canvasRef.current, {
+          quality: 0.95,
+          pixelRatio: exportScale,
+          backgroundColor: '#030712'
+        });
+      } else {
+        filename = `snapog-${slug}-${exportScale}x.png`;
+        dataUrl = await htmlToImage.toPng(canvasRef.current, {
+          quality: 1.0,
+          pixelRatio: exportScale,
+          cacheBust: true
+        });
+      }
 
       const link = document.createElement('a');
-      const filename = `snapog-${config.templateId}-${Date.now()}.png`;
       link.download = filename;
       link.href = dataUrl;
       link.click();
 
       triggerConfetti();
-      onNotify(`🎉 Exported ${filename} in 2X Retina resolution!`);
+      onNotify(`🎉 Đã tải ${filename} (${exportScale}X Retina resolution)!`);
     } catch (err) {
-      console.error('PNG export failed', err);
-      onNotify('⚠️ Export failed. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // Export JPEG
-  const handleExportJPEG = async () => {
-    if (!canvasRef.current || isExporting) return;
-    setIsExporting(true);
-
-    try {
-      const dataUrl = await htmlToImage.toJpeg(canvasRef.current, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#030712'
-      });
-
-      const link = document.createElement('a');
-      const filename = `snapog-${config.templateId}-${Date.now()}.jpg`;
-      link.download = filename;
-      link.href = dataUrl;
-      link.click();
-
-      triggerConfetti();
-      onNotify(`🎉 Exported ${filename} successfully!`);
-    } catch (err) {
-      console.error('JPEG export failed', err);
-      onNotify('⚠️ JPEG export failed.');
+      console.error('Export failed', err);
+      onNotify('⚠️ Quá trình xuất ảnh gặp sự cố. Vui lòng thử lại!');
     } finally {
       setIsExporting(false);
     }
@@ -103,14 +103,14 @@ export default function ExportToolbar({
         ]);
         setIsCopied(true);
         triggerConfetti();
-        onNotify('📋 Image copied to clipboard! Ready to paste into Slack, Figma or Twitter.');
+        onNotify('📋 Đã sao chép ảnh vào clipboard! Bạn có thể dán (Ctrl+V) thẳng vào Twitter, Discord, Slack hoặc Figma.');
         setTimeout(() => setIsCopied(false), 2500);
       } else {
         throw new Error('Clipboard API not supported');
       }
     } catch (err) {
       console.warn('Clipboard write error', err);
-      onNotify('⚠️ Direct clipboard copy not supported in this browser. Please use Export PNG!');
+      onNotify('⚠️ Trình duyệt chưa cấp quyền sao chép ảnh trực tiếp. Vui lòng bấm Tải PNG!');
     } finally {
       setIsExporting(false);
     }
@@ -123,53 +123,109 @@ export default function ExportToolbar({
       left: '50%',
       transform: 'translateX(-50%)',
       zIndex: 40,
-      background: 'rgba(11, 15, 25, 0.9)',
+      background: 'rgba(11, 15, 25, 0.92)',
       backdropFilter: 'blur(20px)',
-      border: '1px solid rgba(255, 255, 255, 0.12)',
+      border: '1px solid rgba(255, 255, 255, 0.14)',
       borderRadius: '16px',
-      padding: '8px 14px',
+      padding: '8px 16px',
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(99, 102, 241, 0.25)'
+      boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(99, 102, 241, 0.3)',
+      flexWrap: 'wrap'
     }}>
-      {/* Primary 2X PNG Export CTA */}
+      {/* Resolution Multiplier Selector */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: 'rgba(255, 255, 255, 0.05)',
+        padding: '3px',
+        borderRadius: '8px',
+        border: '1px solid var(--border-subtle)'
+      }}>
+        {[
+          { scale: 1, label: '1X' },
+          { scale: 2, label: '2X Retina' },
+          { scale: 3, label: '3X 4K' }
+        ].map((item) => (
+          <button
+            key={item.scale}
+            type="button"
+            onClick={() => setExportScale(item.scale)}
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '4px 8px',
+              borderRadius: '5px',
+              background: exportScale === item.scale ? 'rgba(99, 102, 241, 0.35)' : 'transparent',
+              color: exportScale === item.scale ? '#ffffff' : 'var(--text-dim)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Format Selector: PNG / JPG */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: 'rgba(255, 255, 255, 0.05)',
+        padding: '3px',
+        borderRadius: '8px',
+        border: '1px solid var(--border-subtle)'
+      }}>
+        {['png', 'jpg'].map((fmt) => (
+          <button
+            key={fmt}
+            type="button"
+            onClick={() => setFormat(fmt)}
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              padding: '4px 9px',
+              borderRadius: '5px',
+              background: format === fmt ? 'var(--color-primary)' : 'transparent',
+              color: format === fmt ? '#ffffff' : 'var(--text-dim)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {fmt}
+          </button>
+        ))}
+      </div>
+
+      {/* Primary Export CTA */}
       <button
-        onClick={handleExportPNG}
+        onClick={handleExport}
         disabled={isExporting}
         className="btn-emerald"
-        style={{ fontSize: '13px', padding: '9px 18px', gap: '8px' }}
+        style={{ fontSize: '13px', padding: '9px 18px', gap: '8px', fontWeight: 700 }}
       >
         {isExporting ? (
           <Loader2 size={16} className="animate-spin" />
         ) : (
           <Download size={16} />
         )}
-        <span>Export 2X Retina PNG</span>
+        <span>Tải Ảnh {exportScale}X ({format.toUpperCase()})</span>
       </button>
 
-      {/* Export JPEG */}
-      <button
-        onClick={handleExportJPEG}
-        disabled={isExporting}
-        className="btn-secondary"
-        style={{ fontSize: '13px', padding: '8px 14px' }}
-        title="Smaller file size for blogs"
-      >
-        <ImageIcon size={15} />
-        <span>JPG</span>
-      </button>
-
-      {/* Copy Image to Clipboard */}
+      {/* Copy Image directly to Clipboard */}
       <button
         onClick={handleCopyToClipboard}
         disabled={isExporting}
         className="btn-secondary"
-        style={{ fontSize: '13px', padding: '8px 14px' }}
-        title="Copy directly to paste into Figma/Slack"
+        style={{ fontSize: '13px', padding: '8px 14px', gap: '6px' }}
+        title="Sao chép trực tiếp để Ctrl+V vào Twitter, Discord, Slack hoặc Figma"
       >
         {isCopied ? <Check size={15} color="#10b981" /> : <Copy size={15} />}
-        <span>{isCopied ? 'Copied!' : 'Copy Image'}</span>
+        <span>{isCopied ? 'Đã sao chép!' : 'Sao chép ảnh (Ctrl+V)'}</span>
       </button>
 
       {/* Divider */}

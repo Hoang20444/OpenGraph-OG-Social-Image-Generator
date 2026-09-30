@@ -24,14 +24,17 @@ import {
   Tag,
   Dices,
   Loader2,
-  Link2
+  Link2,
+  Highlighter,
+  Paintbrush
 } from 'lucide-react';
 import { 
   TEMPLATES, 
   COLOR_THEMES, 
   ASPECT_RATIOS, 
   DEFAULT_AVATARS,
-  STICKERS
+  STICKERS,
+  FONT_FAMILIES
 } from '../data/templates';
 import { fetchUrlMetadata } from '../utils/magicFetcher';
 
@@ -203,7 +206,9 @@ export default function Sidebar({
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <label className="input-label">Select Template Engine</label>
-                <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>6 Templates</span>
+                <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: 700 }}>
+                  {TEMPLATES.length} Templates (Live)
+                </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {TEMPLATES.map((tmpl) => {
@@ -399,6 +404,57 @@ export default function Sidebar({
               />
             </div>
 
+            {/* Accent Highlight Word (Glow / Marker effect) */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Highlighter size={13} color="var(--color-warning)" />
+                  <span>Highlight Accent Word</span>
+                </label>
+                <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Optional</span>
+              </div>
+              <input
+                type="text"
+                value={config.highlightWord || ''}
+                onChange={(e) => handleTextChange('highlightWord', e.target.value)}
+                className="input-field"
+                placeholder="e.g. 1000$ or AI (word to highlight in title)"
+                style={{ fontSize: '13px' }}
+              />
+            </div>
+
+            {/* Typography Font Family Picker */}
+            <div>
+              <label className="input-label">Typography / Phông Chữ</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                {FONT_FAMILIES.map((f) => {
+                  const isSelected = (config.fontFamily || 'heading') === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => handleTextChange('fontFamily', f.id)}
+                      className="glass-card"
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        textAlign: 'left',
+                        borderColor: isSelected ? 'var(--color-primary)' : 'var(--border-subtle)',
+                        background: isSelected ? 'rgba(99, 102, 241, 0.18)' : 'rgba(255, 255, 255, 0.02)'
+                      }}
+                    >
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: isSelected ? '#ffffff' : 'var(--text-main)', fontFamily: f.fontVar }}>
+                        {f.name}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                        {f.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Category / Pill Badge */}
             <div>
               <label className="input-label">Category / Pill Badge</label>
@@ -577,63 +633,199 @@ export default function Sidebar({
         {/* TAB 3: STYLING & PALETTES */}
         {activeTab === 'styling' && (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Color Themes */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label className="input-label" style={{ margin: 0 }}>Color Gradient Theme</label>
-                <button
-                  type="button"
-                  onClick={onShufflePalette}
-                  className="btn-secondary"
-                  style={{
-                    fontSize: '11px',
-                    padding: '3px 8px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: '#f59e0b',
-                    borderColor: 'rgba(245, 158, 11, 0.3)'
-                  }}
-                  title="Randomize color theme"
-                >
-                  <Dices size={13} />
-                  <span>Shuffle 🎲</span>
-                </button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                {COLOR_THEMES.map((theme) => {
-                  const isSelected = config.themeId === theme.id;
-                  return (
-                    <button
-                      key={theme.id}
-                      onClick={() => onChange({ ...config, themeId: theme.id })}
-                      className="glass-card"
-                      style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        textAlign: 'left',
-                        borderColor: isSelected ? 'var(--color-primary)' : 'var(--border-subtle)',
-                        background: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.02)'
-                      }}
-                    >
-                      <div style={{
-                        width: '26px',
-                        height: '26px',
-                        borderRadius: '6px',
-                        background: theme.gradient,
-                        boxShadow: `0 0 10px ${theme.glowColor}`
-                      }} />
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: isSelected ? '#ffffff' : 'var(--text-main)' }}>
-                        {theme.name}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Color Mode Switcher */}
+            <div style={{
+              display: 'flex',
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '3px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-subtle)'
+            }}>
+              <button
+                type="button"
+                onClick={() => onChange({ ...config, isCustomColor: false })}
+                style={{
+                  flex: 1,
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  padding: '6px 0',
+                  borderRadius: '6px',
+                  background: !config.isCustomColor ? 'var(--color-primary)' : 'transparent',
+                  color: !config.isCustomColor ? '#ffffff' : 'var(--text-dim)',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                Preset Themes
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ ...config, isCustomColor: true })}
+                style={{
+                  flex: 1,
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  padding: '6px 0',
+                  borderRadius: '6px',
+                  background: config.isCustomColor ? 'linear-gradient(135deg, #f59e0b, #ec4899)' : 'transparent',
+                  color: config.isCustomColor ? '#ffffff' : 'var(--text-dim)',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                Custom Palette 🎨
+              </button>
             </div>
+
+            {/* PRESET PALETTES VIEW */}
+            {!config.isCustomColor ? (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label className="input-label" style={{ margin: 0 }}>Color Gradient Theme</label>
+                  <button
+                    type="button"
+                    onClick={onShufflePalette}
+                    className="btn-secondary"
+                    style={{
+                      fontSize: '11px',
+                      padding: '3px 8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      color: '#f59e0b',
+                      borderColor: 'rgba(245, 158, 11, 0.3)'
+                    }}
+                    title="Randomize color theme"
+                  >
+                    <Dices size={13} />
+                    <span>Shuffle 🎲</span>
+                  </button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                  {COLOR_THEMES.map((theme) => {
+                    const isSelected = config.themeId === theme.id;
+                    return (
+                      <button
+                        key={theme.id}
+                        onClick={() => onChange({ ...config, themeId: theme.id })}
+                        className="glass-card"
+                        style={{
+                          padding: '10px',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          textAlign: 'left',
+                          borderColor: isSelected ? 'var(--color-primary)' : 'var(--border-subtle)',
+                          background: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.02)'
+                        }}
+                      >
+                        <div style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '6px',
+                          background: theme.gradient,
+                          boxShadow: `0 0 10px ${theme.glowColor}`
+                        }} />
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: isSelected ? '#ffffff' : 'var(--text-main)' }}>
+                          {theme.name}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              /* CUSTOM COLORS BUILDER */
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                padding: '16px',
+                borderRadius: '12px',
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '14px'
+              }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Paintbrush size={14} color="#f59e0b" />
+                  <span>Custom Color Studio</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  <div>
+                    <label className="input-label" style={{ fontSize: '10px' }}>Primary</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="color"
+                        value={config.customPrimary || '#6366f1'}
+                        onChange={(e) => onChange({ ...config, customPrimary: e.target.value })}
+                        style={{ width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', border: 'none', background: 'none' }}
+                      />
+                      <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                        {config.customPrimary || '#6366f1'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="input-label" style={{ fontSize: '10px' }}>Secondary</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="color"
+                        value={config.customSecondary || '#06b6d4'}
+                        onChange={(e) => onChange({ ...config, customSecondary: e.target.value })}
+                        style={{ width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', border: 'none', background: 'none' }}
+                      />
+                      <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                        {config.customSecondary || '#06b6d4'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="input-label" style={{ fontSize: '10px' }}>Background</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="color"
+                        value={config.customBg || '#030712'}
+                        onChange={(e) => onChange({ ...config, customBg: e.target.value })}
+                        style={{ width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', border: 'none', background: 'none' }}
+                      />
+                      <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                        {config.customBg || '#030712'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gradient Angle Slider */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label className="input-label" style={{ margin: 0, fontSize: '11px' }}>Gradient Angle</label>
+                    <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
+                      {config.customGradientAngle || 135}°
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    value={config.customGradientAngle || 135}
+                    onChange={(e) => onChange({ ...config, customGradientAngle: parseInt(e.target.value) })}
+                    style={{ width: '100%', accentColor: 'var(--color-primary)' }}
+                  />
+                </div>
+
+                {/* Custom Gradient Preview Bar */}
+                <div style={{
+                  height: '24px',
+                  borderRadius: '6px',
+                  background: `linear-gradient(${config.customGradientAngle || 135}deg, ${config.customPrimary || '#6366f1'} 0%, ${config.customSecondary || '#06b6d4'} 100%)`,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }} />
+              </div>
+            )}
 
             {/* Background Texture Pattern */}
             <div>

@@ -7,34 +7,61 @@ import ProModal from './components/ProModal';
 import CoffeeModal from './components/CoffeeModal';
 import MetaTagsModal from './components/MetaTagsModal';
 import BatchExportModal from './components/BatchExportModal';
+import SavedDesignsModal from './components/SavedDesignsModal';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
 import { COLOR_THEMES } from './data/templates';
 import { encodeConfigToUrl, decodeConfigFromUrl } from './utils/magicFetcher';
 
+const DEFAULT_CONFIG = {
+  title: 'Cách kiếm 1000$ đầu tiên với tư cách là một Fresher độc lập',
+  subtitle: 'Hướng dẫn chi tiết tự tay làm sản phẩm web & tool từ 0 đồng, không cần backend, tối ưu hoá chuyển đổi và dòng tiền.',
+  categoryTag: '🚀 HƯỚNG DẪN THỰC CHIẾN',
+  authorName: 'Nguyen Van A',
+  authorRole: 'Fresher Developer & Indie Hacker',
+  siteUrl: 'snapog.dev',
+  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  brandIcon: 'sparkles',
+  themeId: 'indigo-cyan',
+  templateId: 'saas-launch',
+  aspectRatio: '1200x630',
+  pattern: 'dots',
+  fontSize: 50,
+  align: 'left',
+  padding: 60,
+  borderRadius: 16,
+  shadowIntensity: 'medium',
+  tilt3D: false,
+  sticker: 'none',
+  fontFamily: 'heading',
+  highlightWord: '1000$',
+  isCustomColor: false,
+  customPrimary: '#6366f1',
+  customSecondary: '#06b6d4',
+  customBg: '#030712',
+  customGradientAngle: 135
+};
+
 export default function App() {
   const canvasRef = useRef(null);
 
-  // App Configuration State
-  const [config, setConfig] = useState({
-    title: 'Cách kiếm 1000$ đầu tiên với tư cách là một Fresher độc lập',
-    subtitle: 'Hướng dẫn chi tiết tự tay làm sản phẩm web & tool từ 0 đồng, không cần backend, tối ưu hoá chuyển đổi và dòng tiền.',
-    categoryTag: '🚀 HƯỚNG DẪN THỰC CHIẾN',
-    authorName: 'Nguyen Van A',
-    authorRole: 'Fresher Developer & Indie Hacker',
-    siteUrl: 'snapog.dev',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    brandIcon: 'sparkles',
-    themeId: 'indigo-cyan',
-    templateId: 'saas-launch',
-    aspectRatio: '1200x630',
-    pattern: 'dots',
-    fontSize: 50,
-    align: 'left',
-    padding: 60,
-    borderRadius: 16,
-    shadowIntensity: 'medium',
-    tilt3D: false,
-    sticker: 'none'
+  // App Configuration State with LocalStorage Autosave
+  const [config, setConfig] = useState(() => {
+    try {
+      const saved = localStorage.getItem('snapog_active_config');
+      return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : DEFAULT_CONFIG;
+    } catch {
+      return DEFAULT_CONFIG;
+    }
+  });
+
+  // Saved Designs Bookmarks (LocalStorage)
+  const [savedDesigns, setSavedDesigns] = useState(() => {
+    try {
+      const saved = localStorage.getItem('snapog_saved_designs');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   // View Mode: 'single' (Canvas) vs 'gallery' (Instant Grid of 11 Templates)
@@ -50,6 +77,7 @@ export default function App() {
   const [isCoffeeOpen, setIsCoffeeOpen] = useState(false);
   const [isMetaOpen, setIsMetaOpen] = useState(false);
   const [isBatchOpen, setIsBatchOpen] = useState(false);
+  const [isSavedOpen, setIsSavedOpen] = useState(false);
 
   // Toast Notification System
   const [toasts, setToasts] = useState([]);
@@ -61,6 +89,15 @@ export default function App() {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3500);
   };
+
+  // Autosave config to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('snapog_active_config', JSON.stringify(config));
+    } catch (e) {
+      console.warn('Autosave error', e);
+    }
+  }, [config]);
 
   // Decode configuration from URL search params on mount
   useEffect(() => {
@@ -96,7 +133,7 @@ export default function App() {
     const availableThemes = COLOR_THEMES.filter((t) => t.id !== config.themeId);
     const randomTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
     if (randomTheme) {
-      setConfig((prev) => ({ ...prev, themeId: randomTheme.id }));
+      setConfig((prev) => ({ ...prev, isCustomColor: false, themeId: randomTheme.id }));
       addNotification(`🎲 Đã chuyển sang bảng màu: ${randomTheme.name}`);
     }
   };
@@ -118,6 +155,51 @@ export default function App() {
   const handleSelectTemplate = (templateId) => {
     setConfig((prev) => ({ ...prev, templateId }));
     addNotification(`🎨 Đã chọn mẫu: ${templateId}`);
+  };
+
+  // Save current design to bookmarks
+  const handleSaveCurrentDesign = () => {
+    const newItem = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      config: { ...config }
+    };
+    const updated = [newItem, ...savedDesigns.slice(0, 19)]; // Keep max 20
+    setSavedDesigns(updated);
+    try {
+      localStorage.setItem('snapog_saved_designs', JSON.stringify(updated));
+      addNotification('💾 Đã lưu thiết kế vào danh sách của bạn!');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Delete saved design
+  const handleDeleteSavedDesign = (id) => {
+    const updated = savedDesigns.filter((item) => item.id !== id);
+    setSavedDesigns(updated);
+    try {
+      localStorage.setItem('snapog_saved_designs', JSON.stringify(updated));
+      addNotification('🗑️ Đã xóa mẫu thiết kế.');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Load saved design
+  const handleLoadSavedDesign = (loadedConfig) => {
+    setConfig({ ...DEFAULT_CONFIG, ...loadedConfig });
+    setIsSavedOpen(false);
+    addNotification('✨ Đã tải mẫu thiết kế thành công!');
+  };
+
+  // Reset to default
+  const handleResetConfig = () => {
+    if (window.confirm('Bạn có chắc muốn khôi phục thiết kế ban đầu không?')) {
+      setConfig(DEFAULT_CONFIG);
+      localStorage.removeItem('snapog_active_config');
+      addNotification('🔄 Đã khôi phục thiết kế ban đầu!');
+    }
   };
 
   // Keyboard shortcut listener (Ctrl + S to trigger export)
@@ -143,6 +225,9 @@ export default function App() {
         onOpenMeta={() => setIsMetaOpen(true)}
         onShareDesign={handleShareDesign}
         onOpenBatch={() => setIsBatchOpen(true)}
+        onOpenSaved={() => setIsSavedOpen(true)}
+        savedCount={savedDesigns.length}
+        onResetConfig={handleResetConfig}
         isPro={isPro}
       />
 
@@ -205,6 +290,15 @@ export default function App() {
         onClose={() => setIsBatchOpen(false)}
         config={config}
         onNotify={addNotification}
+      />
+
+      <SavedDesignsModal
+        isOpen={isSavedOpen}
+        onClose={() => setIsSavedOpen(false)}
+        savedDesigns={savedDesigns}
+        onLoadDesign={handleLoadSavedDesign}
+        onDeleteDesign={handleDeleteSavedDesign}
+        onSaveCurrent={handleSaveCurrentDesign}
       />
 
       {/* Toast Notification Container */}

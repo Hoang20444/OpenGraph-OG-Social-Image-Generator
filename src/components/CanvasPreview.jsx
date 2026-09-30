@@ -26,7 +26,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import { COLOR_THEMES, ASPECT_RATIOS, STICKERS, TEMPLATES } from '../data/templates';
+import { COLOR_THEMES, ASPECT_RATIOS, STICKERS, TEMPLATES, FONT_FAMILIES } from '../data/templates';
 
 const ICONS_MAP = {
   sparkles: Sparkles,
@@ -56,9 +56,53 @@ export default function CanvasPreview({
   const [galleryCategory, setGalleryCategory] = useState('all');
   const containerRef = useRef(null);
 
-  const currentTheme = COLOR_THEMES.find((t) => t.id === config.themeId) || COLOR_THEMES[0];
+  const currentTheme = config.isCustomColor ? {
+    id: 'custom',
+    name: 'Custom Palette',
+    primary: config.customPrimary || '#6366f1',
+    secondary: config.customSecondary || '#06b6d4',
+    bg: config.customBg || '#030712',
+    surface: '#0f172a',
+    text: '#ffffff',
+    gradient: `linear-gradient(${config.customGradientAngle || 135}deg, ${config.customPrimary || '#6366f1'} 0%, ${config.customSecondary || '#06b6d4'} 100%)`,
+    glowColor: `${config.customPrimary || '#6366f1'}55`,
+    border: `${config.customPrimary || '#6366f1'}4d`
+  } : (COLOR_THEMES.find((t) => t.id === config.themeId) || COLOR_THEMES[0]);
+
   const currentRatio = ASPECT_RATIOS.find((r) => r.id === config.aspectRatio) || ASPECT_RATIOS[0];
   const BrandIcon = ICONS_MAP[config.brandIcon] || Sparkles;
+
+  const activeFontObj = FONT_FAMILIES.find((f) => f.id === config.fontFamily) || FONT_FAMILIES[1];
+  const activeFontVar = activeFontObj ? activeFontObj.fontVar : 'var(--font-heading)';
+
+  // Helper to render title with optional gradient keyword highlight
+  const renderTitle = (titleText) => {
+    if (!titleText) return '';
+    if (!config.highlightWord || !config.highlightWord.trim()) {
+      return titleText;
+    }
+    const needle = config.highlightWord.trim();
+    const parts = titleText.split(new RegExp(`(${needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    return parts.map((part, idx) => {
+      if (part.toLowerCase() === needle.toLowerCase()) {
+        return (
+          <span
+            key={idx}
+            style={{
+              background: currentTheme.gradient,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              borderBottom: `3px solid ${currentTheme.secondary}`,
+              paddingBottom: '2px'
+            }}
+          >
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
 
   // Responsive scale calculation to fit screen
   useEffect(() => {
@@ -574,7 +618,7 @@ export default function CanvasPreview({
               </div>
               <div style={{ padding: '12px', background: '#16181c', borderTop: '1px solid #2f3336' }}>
                 <div style={{ fontSize: '12px', color: '#71767b', textTransform: 'uppercase' }}>{config.siteUrl}</div>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff', marginTop: '2px' }}>{config.title}</div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff', marginTop: '2px' }}>{renderTitle(config.title)}</div>
                 <div style={{ fontSize: '13px', color: '#71767b', marginTop: '2px' }}>{config.subtitle}</div>
               </div>
             </div>
@@ -631,7 +675,7 @@ export default function CanvasPreview({
               </div>
               <div style={{ padding: '12px', background: '#24292e' }}>
                 <span style={{ fontSize: '11px', color: '#9ba0a6', textTransform: 'uppercase' }}>{config.siteUrl}</span>
-                <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{config.title}</h4>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{renderTitle(config.title)}</h4>
               </div>
             </div>
           </div>
@@ -685,7 +729,7 @@ export default function CanvasPreview({
           height: `${currentRatio.height}px`,
           position: 'relative',
           overflow: 'hidden',
-          fontFamily: 'var(--font-sans)',
+          fontFamily: activeFontVar,
           color: currentTheme.text,
           boxSizing: 'border-box',
           ...getPatternStyle()
@@ -791,7 +835,7 @@ export default function CanvasPreview({
                 marginBottom: '22px',
                 color: '#ffffff'
               }}>
-                {config.title}
+                {renderTitle(config.title)}
               </h1>
               <p style={{
                 fontSize: '26px',
@@ -935,7 +979,7 @@ export default function CanvasPreview({
                   letterSpacing: '-0.02em',
                   marginBottom: '16px'
                 }}>
-                  {config.title}
+                  {renderTitle(config.title)}
                 </h1>
                 <p style={{
                   fontSize: '22px',
@@ -1027,7 +1071,7 @@ export default function CanvasPreview({
                   lineHeight: 1.18,
                   marginBottom: '18px'
                 }}>
-                  {config.title}
+                  {renderTitle(config.title)}
                 </h1>
                 <p style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.4 }}>
                   {config.subtitle}
@@ -1160,7 +1204,7 @@ export default function CanvasPreview({
                 letterSpacing: '-0.03em',
                 marginBottom: '20px'
               }}>
-                {config.title}
+                {renderTitle(config.title)}
               </h1>
               <p style={{
                 fontSize: '24px',
@@ -1270,7 +1314,7 @@ export default function CanvasPreview({
                   lineHeight: 1.2,
                   marginBottom: '14px'
                 }}>
-                  {config.title}
+                  {renderTitle(config.title)}
                 </h1>
                 <p style={{ fontSize: '22px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.4 }}>
                   {config.subtitle}
@@ -1374,7 +1418,7 @@ export default function CanvasPreview({
                 lineHeight: 1.15,
                 textShadow: `0 0 20px ${currentTheme.primary}88`
               }}>
-                {config.title}
+                {renderTitle(config.title)}
               </h1>
               <p style={{
                 fontSize: '22px',
@@ -1492,7 +1536,7 @@ export default function CanvasPreview({
                   lineHeight: 1.22,
                   marginBottom: '16px'
                 }}>
-                  {config.title}
+                  {renderTitle(config.title)}
                 </h1>
 
                 {/* Hand-drawn SVG highlighter / swoosh underline */}
@@ -1608,7 +1652,7 @@ export default function CanvasPreview({
                     fontStyle: 'normal',
                     marginBottom: '18px'
                   }}>
-                    {config.title}
+                    {renderTitle(config.title)}
                   </h1>
                   <p className="font-serif" style={{
                     fontSize: '24px',
@@ -1714,7 +1758,7 @@ export default function CanvasPreview({
                   letterSpacing: '-0.03em',
                   marginBottom: '18px'
                 }}>
-                  {config.title}
+                  {renderTitle(config.title)}
                 </h1>
                 <p style={{
                   fontSize: '24px',
@@ -1856,7 +1900,7 @@ export default function CanvasPreview({
                     lineHeight: 1.2,
                     marginBottom: '16px'
                   }}>
-                    {config.title}
+                    {renderTitle(config.title)}
                   </h1>
                   <p style={{
                     fontSize: '22px',
@@ -1952,7 +1996,7 @@ export default function CanvasPreview({
                 fontStyle: 'italic',
                 marginBottom: '20px'
               }}>
-                {config.title}
+                {renderTitle(config.title)}
               </h1>
               <p style={{
                 fontSize: '22px',
