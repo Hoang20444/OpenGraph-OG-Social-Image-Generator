@@ -31,7 +31,7 @@ export const PAYMENT_CONFIG = {
   gumroadUrl: 'https://gumroad.com', // Thay bằng link sản phẩm Gumroad của bạn
 
   // Link tài khoản Buy Me a Coffee / Ko-fi
-  coffeeUrl: 'https://buymeacoffee.com',
+  coffeeUrl: 'https://buymeacoffee.com/nvhoang',
 
   // ---------------------------------------------------------------------------
   // HÀM TIỆN ÍCH LẤY ĐƯỜNG DẪN ẢNH QR:

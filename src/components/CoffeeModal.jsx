@@ -20,11 +20,12 @@ export default function CoffeeModal({
       origin: { y: 0.7 }
     });
     setIsThanked(true);
-    onNotify(`☕ Wow! Thank you so much for supporting with a $${amount} coffee!`);
+    onNotify(`☕ Cảm ơn bạn rất nhiều vì đã ủng hộ $${amount} qua BuyMeACoffee!`);
+    window.open(PAYMENT_CONFIG.coffeeUrl, '_blank');
     setTimeout(() => {
       setIsThanked(false);
       onClose();
-    }, 2000);
+    }, 2500);
   };
 
   return (
@@ -149,7 +150,7 @@ export default function CoffeeModal({
             ) : (
               <>
                 <Heart size={18} />
-                <span>Mô phỏng mời cà phê ${selectedAmount}</span>
+                <span>Ủng hộ ${selectedAmount} qua BuyMeACoffee</span>
               </>
             )}
           </button>

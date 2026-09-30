@@ -10,7 +10,10 @@ import {
   ExternalLink,
   ShieldCheck,
   Zap,
-  ArrowRight
+  ArrowRight,
+  CheckCircle2,
+  Lock,
+  LogOut
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import Logo from './Logo';
@@ -21,6 +24,7 @@ export default function ProModal({
   onClose,
   isPro,
   onActivatePro,
+  onDeactivatePro,
   onNotify
 }) {
   const [activePaymentTab, setActivePaymentTab] = useState('vietqr'); // 'vietqr' | 'gumroad' | 'license'
@@ -29,22 +33,176 @@ export default function ProModal({
 
   if (!isOpen) return null;
 
+  const VALID_KEYS = [
+    'TINYFORGE-PRO-2026',
+    'SNAP-HOANG-VIP',
+    'SNAP-LIFETIME-PRO',
+    'PRO-DEV-2026'
+  ];
+
   const handleApplyKey = (keyToTest) => {
     const key = (keyToTest || inputKey).trim().toUpperCase();
-    if (key === 'PRO-DEV-2026' || key.startsWith('SNAP-')) {
+    if (VALID_KEYS.includes(key) || /^(SNAP|TINYFORGE)-PRO-[A-Z0-9]+$/i.test(key)) {
       onActivatePro();
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 120,
+        spread: 80,
         origin: { y: 0.6 }
       });
-      onNotify('🎉 Congratulations! SnapOG PRO has been unlocked successfully!');
+      onNotify('🎉 Chúc mừng! Bản quyền SnapOG PRO đã được kích hoạt vĩnh viễn!');
+      setErrorMsg('');
       onClose();
     } else {
-      setErrorMsg('Invalid License Key. Try the demo key: PRO-DEV-2026');
+      setErrorMsg('Mã License Key không hợp lệ. Vui lòng kiểm tra lại!');
     }
   };
 
+  // If already PRO, display membership details & features
+  if (isPro) {
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div
+          className="glass-panel"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            maxWidth: '560px',
+            background: 'var(--bg-surface-elevated)',
+            borderRadius: '20px',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            overflow: 'hidden',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(16, 185, 129, 0.2)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {/* Header */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.15))',
+            padding: '24px 28px',
+            borderBottom: '1px solid rgba(16, 185, 129, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)'
+              }}>
+                <Crown size={26} color="#ffffff" />
+              </div>
+              <div>
+                <h2 className="font-heading" style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff' }}>
+                  SnapOG <span style={{ color: '#10b981' }}>PRO Member</span>
+                </h2>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Gói Bản Quyền Vĩnh Viễn • TinyForge Studio
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              style={{
+                padding: '6px',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.06)',
+                color: 'var(--text-muted)'
+              }}
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: '12px',
+              padding: '14px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <CheckCircle2 size={24} color="#10b981" style={{ flexShrink: 0 }} />
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>
+                  Tài khoản của bạn đã được kích hoạt đầy đủ quyền hạn PRO!
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                  Không giới hạn lượt tải, mở khóa 100% template & công cụ tự động hóa.
+                </div>
+              </div>
+            </div>
+
+            {/* Unlocked Features */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700 }}>
+                Đặc quyền đang hoạt động:
+              </span>
+              {[
+                'Mở khóa toàn bộ 15+ Mẫu thiết kế độc quyền (Podcast, Cyberpunk HUD...)',
+                'Xuất ảnh chất lượng cao 4K / 3X Retina sắc nét',
+                'Batch CSV Generator (Tự động sinh hàng chục ảnh trong 1 giây)',
+                'Tải lên Logo & Watermark thương hiệu cá nhân không giới hạn',
+                'Lưu mẫu và chia sẻ thiết kế qua liên kết thông minh',
+                'Cập nhật tính năng mới trọn đời không tốn thêm chi phí'
+              ].map((feat, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#f8fafc' }}>
+                  <Check size={15} color="#10b981" />
+                  <span>{feat}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button
+                onClick={onClose}
+                className="btn-emerald"
+                style={{ flex: 1, padding: '12px', fontSize: '14px', justifyContent: 'center' }}
+              >
+                Tiếp tục sáng tạo ngay
+              </button>
+            </div>
+
+            {onDeactivatePro && (
+              <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                <button
+                  onClick={() => {
+                    if (window.confirm('Bạn có chắc muốn hủy kích hoạt PRO trên trình duyệt này?')) {
+                      onDeactivatePro();
+                      onClose();
+                    }
+                  }}
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-dim)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Hủy kích hoạt trên thiết bị này (Dành cho kiểm thử)
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If NOT Pro, show checkout & activation
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -79,7 +237,7 @@ export default function ProModal({
                 SnapOG <span style={{ color: '#f59e0b' }}>PRO Studio</span>
               </h2>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                TinyForge • Pay Once • Own Forever • Zero Subscription
+                TinyForge • Thanh Toán 1 Lần • Sở Hữu Vĩnh Viễn • 0đ Phí Duy Trì
               </div>
             </div>
           </div>
@@ -107,12 +265,12 @@ export default function ProModal({
             gap: '10px'
           }}>
             {[
-              'All 15+ PRO Design Engines',
-              'Podcast & Cyberpunk HUD Templates',
-              'Batch CSV Generator (20+ cards in 1s)',
-              'Custom Logo & Watermark Upload',
-              'Retina 4K High-Res Vector Output',
-              'Priority Lifetime Upgrades'
+              'Toàn bộ 15+ Mẫu Design Engines',
+              'Mẫu Podcast & Cyberpunk HUD độc quyền',
+              'Batch CSV Generator (20+ ảnh trong 1s)',
+              'Tải Logo & Watermark riêng',
+              'Xuất ảnh chất lượng 4K Vector/Retina',
+              'Cập nhật tính năng mới trọn đời'
             ].map((feature, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#f8fafc' }}>
                 <Check size={14} color="#10b981" />
@@ -133,11 +291,11 @@ export default function ProModal({
           }}>
             <div>
               <span style={{ fontSize: '12px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700 }}>
-                Special Launch Price
+                Ưu Đãi Ra Mắt (Giảm 67%)
               </span>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '2px' }}>
                 <span style={{ fontSize: '28px', fontWeight: 800, color: '#ffffff' }}>49.000₫</span>
-                <span style={{ fontSize: '15px', color: 'var(--text-dim)' }}>or $9 USD</span>
+                <span style={{ fontSize: '15px', color: 'var(--text-dim)' }}>hoặc $9 USD</span>
                 <span style={{ fontSize: '12px', textDecoration: 'line-through', color: '#ef4444' }}>149.000₫</span>
               </div>
             </div>
@@ -150,7 +308,7 @@ export default function ProModal({
               color: '#10b981',
               border: '1px solid rgba(16, 185, 129, 0.3)'
             }}>
-              LIFETIME ACCESS
+              LIFETIME PASS
             </div>
           </div>
 
@@ -165,8 +323,8 @@ export default function ProModal({
               marginBottom: '16px'
             }}>
               {[
-                { id: 'vietqr', label: 'Quét mã (VND)', icon: QrCode },
-                { id: 'gumroad', label: 'Gumroad / Card (USD)', icon: CreditCard },
+                { id: 'vietqr', label: 'Quét mã VietQR (VND)', icon: QrCode },
+                { id: 'gumroad', label: 'Quốc Tế / Thẻ (USD)', icon: CreditCard },
                 { id: 'license', label: 'Nhập License Key', icon: Key }
               ].map((tab) => {
                 const Icon = tab.icon;
@@ -200,7 +358,7 @@ export default function ProModal({
               })}
             </div>
 
-            {/* TAB 1: VIETQR DEMO */}
+            {/* TAB 1: VIETQR */}
             {activePaymentTab === 'vietqr' && (
               <div style={{
                 background: 'rgba(255, 255, 255, 0.02)',
@@ -220,7 +378,6 @@ export default function ProModal({
                   display: 'inline-block',
                   boxShadow: '0 8px 20px rgba(0, 0, 0, 0.4)'
                 }}>
-                  {/* Real-time Dynamic VietQR Code or Custom Image */}
                   <img
                     src={PAYMENT_CONFIG.getQrUrl()}
                     alt="VietQR Code"
@@ -237,19 +394,29 @@ export default function ProModal({
                   </div>
                 </div>
 
-                {/* Instant Unlock Demo Button for testing */}
-                <button
-                  onClick={() => handleApplyKey('PRO-DEV-2026')}
-                  className="btn-emerald"
-                  style={{ width: '100%', fontSize: '13px', marginTop: '6px' }}
-                >
-                  <Sparkles size={15} />
-                  <span>Mô phỏng thanh toán thành công (Bấm để kích hoạt PRO)</span>
-                </button>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border-subtle)',
+                  width: '100%',
+                  textAlign: 'left',
+                  marginTop: '4px'
+                }}>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#f59e0b', marginBottom: '4px' }}>
+                    💡 Hướng dẫn nhận mã kích hoạt sau khi thanh toán:
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                    1. Mở App ngân hàng quét mã QR chuyển khoản <strong>49.000₫</strong> với nội dung trên.<br />
+                    2. Chụp ảnh màn hình giao dịch thành công.<br />
+                    3. Gửi ảnh qua Zalo/Email hoặc liên hệ tác giả để nhận mã <strong>License Key</strong> kích hoạt ngay lập tức.<br />
+                    4. Chuyển sang tab <strong>"Nhập License Key"</strong> bên cạnh để mở khóa vĩnh viễn!
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* TAB 2: GUMROAD / LEMON SQUEEZY */}
+            {/* TAB 2: GUMROAD / BUY ME A COFFEE */}
             {activePaymentTab === 'gumroad' && (
               <div style={{
                 background: 'rgba(255, 255, 255, 0.02)',
@@ -264,24 +431,37 @@ export default function ProModal({
                   <ShieldCheck size={22} color="#10b981" />
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff' }}>
-                      Thanh toán Quốc tế qua Lemon Squeezy / Gumroad
+                      Thanh toán Quốc tế qua Lemon Squeezy / Gumroad / BuyMeACoffee
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>
-                      Hỗ trợ thẻ Visa, Mastercard, PayPal & Apple Pay với 0đ phí duy trì.
+                      Hỗ trợ thẻ Visa, Mastercard, PayPal & Apple Pay với 0đ phí duy trì hàng tháng.
                     </div>
                   </div>
                 </div>
 
-                <a
-                  href={PAYMENT_CONFIG.gumroadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  style={{ width: '100%', fontSize: '13px', padding: '10px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                >
-                  <span>Chuyển tới trang thanh toán Gumroad ($9)</span>
-                  <ExternalLink size={14} />
-                </a>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <a
+                    href={PAYMENT_CONFIG.gumroadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{ width: '100%', fontSize: '13px', padding: '10px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  >
+                    <span>Thanh toán $9 qua Gumroad</span>
+                    <ExternalLink size={14} />
+                  </a>
+
+                  <a
+                    href={PAYMENT_CONFIG.coffeeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary"
+                    style={{ width: '100%', fontSize: '13px', padding: '10px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#f59e0b' }}
+                  >
+                    <span>Ủng hộ $9 qua Buy Me a Coffee</span>
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
               </div>
             )}
 
@@ -297,26 +477,32 @@ export default function ProModal({
                 gap: '12px'
               }}>
                 <div>
-                  <label className="input-label">Nhập License Key đã nhận qua Email</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <label className="input-label">Nhập License Key bản quyền của bạn</label>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
                     <input
                       type="text"
                       value={inputKey}
-                      onChange={(e) => setInputKey(e.target.value)}
-                      placeholder="e.g. PRO-DEV-2026"
+                      onChange={(e) => {
+                        setInputKey(e.target.value);
+                        setErrorMsg('');
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleApplyKey();
+                      }}
+                      placeholder="e.g. TINYFORGE-PRO-XXXX"
                       className="input-field font-mono"
                       style={{ textTransform: 'uppercase' }}
                     />
                     <button
                       onClick={() => handleApplyKey()}
                       className="btn-primary"
-                      style={{ whiteSpace: 'nowrap' }}
+                      style={{ whiteSpace: 'nowrap', padding: '0 18px' }}
                     >
                       Kích hoạt
                     </button>
                   </div>
                   {errorMsg && (
-                    <div style={{ fontSize: '12px', color: 'var(--color-danger)', marginTop: '6px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--color-danger)', marginTop: '8px' }}>
                       {errorMsg}
                     </div>
                   )}
@@ -326,19 +512,11 @@ export default function ProModal({
                   fontSize: '11px',
                   color: 'var(--text-dim)',
                   background: 'rgba(255, 255, 255, 0.04)',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  lineHeight: '1.6'
                 }}>
-                  <span>Demo Key: <strong>PRO-DEV-2026</strong></span>
-                  <button
-                    onClick={() => handleApplyKey('PRO-DEV-2026')}
-                    style={{ color: 'var(--color-primary)', fontWeight: 700 }}
-                  >
-                    Tự động điền & Kích hoạt
-                  </button>
+                  🔒 <strong>Lưu ý:</strong> Mã License Key có giá trị vĩnh viễn. Bạn có thể sử dụng lại mã này bất kỳ lúc nào trên các thiết bị hoặc trình duyệt khác của bạn.
                 </div>
               </div>
             )}

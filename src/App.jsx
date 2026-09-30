@@ -99,8 +99,32 @@ export default function App() {
     }
   }, [config]);
 
-  // Decode configuration from URL search params on mount
+  // Decode configuration & License Key from URL search params on mount
   useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const key = urlParams.get('key');
+      const VALID_KEYS = [
+        'TINYFORGE-PRO-2026',
+        'SNAP-HOANG-VIP',
+        'SNAP-LIFETIME-PRO',
+        'PRO-DEV-2026'
+      ];
+      if (key) {
+        const cleanKey = key.trim().toUpperCase();
+        if (VALID_KEYS.includes(cleanKey) || /^(SNAP|TINYFORGE)-PRO-[A-Z0-9]+$/i.test(cleanKey)) {
+          setIsPro(true);
+          localStorage.setItem('snapog_pro', 'true');
+          addNotification(`👑 Đã kích hoạt bản quyền PRO vĩnh viễn! (Key: ${cleanKey})`);
+          const url = new URL(window.location.href);
+          url.searchParams.delete('key');
+          window.history.replaceState({}, document.title, url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
+        }
+      }
+    } catch (e) {
+      console.warn('URL License parse error', e);
+    }
+
     const sharedConfig = decodeConfigFromUrl();
     if (sharedConfig) {
       setConfig((prev) => ({ ...prev, ...sharedConfig }));
@@ -111,6 +135,12 @@ export default function App() {
   const handleActivatePro = () => {
     setIsPro(true);
     localStorage.setItem('snapog_pro', 'true');
+  };
+
+  const handleDeactivatePro = () => {
+    setIsPro(false);
+    localStorage.removeItem('snapog_pro');
+    addNotification('Đã hủy kích hoạt PRO trên thiết bị này.');
   };
 
   const handleApplyPreset = (preset) => {
@@ -269,6 +299,7 @@ export default function App() {
         onClose={() => setIsProOpen(false)}
         isPro={isPro}
         onActivatePro={handleActivatePro}
+        onDeactivatePro={handleDeactivatePro}
         onNotify={addNotification}
       />
 
