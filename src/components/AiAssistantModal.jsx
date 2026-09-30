@@ -108,6 +108,8 @@ export default function AiAssistantModal({
       setLastAiMeta({
         isRealAi: res.isRealAi,
         model: res.model || selectedModel,
+        isFallback: res.isFallback,
+        fallbackFrom: res.fallbackFrom,
         elapsed: res.elapsed,
         errorMsg: res.errorMsg,
         failedModel: res.failedModel
@@ -115,7 +117,11 @@ export default function AiAssistantModal({
 
       if (onNotify) {
         if (res.isRealAi) {
-          onNotify(`✨ Google Gemini (${res.model}) đã phân tích & tạo 3 Hook triệu view! (${res.elapsed}ms)`);
+          if (res.isFallback) {
+            onNotify(`⚡ Mô hình "${res.fallbackFrom}" quá tải (503), đã tự động dùng "${res.model}" thành công! (${res.elapsed}ms)`);
+          } else {
+            onNotify(`✨ Google Gemini (${res.model}) đã phân tích & tạo 3 Hook triệu view! (${res.elapsed}ms)`);
+          }
         } else if (res.errorMsg) {
           onNotify(`⚠️ Google API báo lỗi (${res.failedModel}): ${res.errorMsg}`);
         } else {
@@ -540,9 +546,11 @@ export default function AiAssistantModal({
                     }} />
                     <span style={{ fontWeight: 700 }}>
                       {lastAiMeta.isRealAi 
-                        ? `XÁC THỰC: Phản hồi từ mô hình Google Gemini "${lastAiMeta.model}"` 
+                        ? (lastAiMeta.isFallback 
+                            ? `TỰ ĐỘNG CHUYỂN TIẾP: Do "${lastAiMeta.fallbackFrom}" quá tải (503) -> Đã lấy thành công từ "${lastAiMeta.model}"` 
+                            : `XÁC THỰC: Phản hồi từ mô hình Google Gemini "${lastAiMeta.model}"`)
                         : (lastAiMeta.errorMsg 
-                            ? `Google API báo lỗi: "${lastAiMeta.errorMsg}" -> Đã chạy bộ sinh dự phòng` 
+                            ? `Google API báo lỗi (${lastAiMeta.failedModel}): "${lastAiMeta.errorMsg}" -> Đã chạy bộ sinh dự phòng` 
                             : 'Đang chạy bộ sinh thông minh cục bộ (Chưa nhập API Key)')
                       }
                     </span>

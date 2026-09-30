@@ -95,6 +95,17 @@ export async function testGeminiConnection(apiKey, model) {
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       const errMsg = errData.error?.message || `Lỗi HTTP ${res.status}`;
+      
+      if (res.status === 503) {
+        return {
+          success: false,
+          statusCode: 503,
+          model: modelToTest,
+          isOverloaded: true,
+          message: `⚠️ Mô hình "${modelToTest}" đang bị quá tải trên máy chủ Google (503 High Demand). Đây là lỗi tạm thời của Google. Gợi ý: Hãy đổi sang "gemini-3.5-flash" hoặc "gemini-1.5-flash" để chạy ổn định ngay lập tức!`
+        };
+      }
+
       return {
         success: false,
         statusCode: res.status,
@@ -216,7 +227,6 @@ export async function generateAiSocialHooks(topic) {
 
   // Gọi trực tiếp Google Gemini API với model đã chọn và JSON Response Schema
   const selectedModel = getStoredGeminiModel();
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
   const startTime = Date.now();
 
   const promptText = `
@@ -246,71 +256,96 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ với cấu trúc sau:
 Chỉ trả về JSON thuần túy, không bọc trong markdown code block.
 `;
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: promptText }]
+  // Chuỗi mô hình dự phòng tự động khi gặp 503 (High Demand) hoặc 429
+  const MODEL_FALLBACK_CANDIDATES = [
+    selectedModel,
+    'gemini-3.5-flash',
+    'gemini-1.5-flash'
+  ].filter((m, idx, arr) => arr.indexOf(m) === idx);
+
+  let lastError = null;
+  let lastStatus = null;
+  let failedInitialModel = null;
+
+  for (let i = 0; i < MODEL_FALLBACK_CANDIDATES.length; i++) {
+    const currentModel = MODEL_FALLBACK_CANDIDATES[i];
+    const isFallback = i > 0;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: promptText }]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.8
           }
-        ],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.8
+        })
+      });
+
+      const elapsed = Date.now() - startTime;
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) {
+          throw new Error('Mô hình AI không trả về nội dung.');
         }
-      })
-    });
 
-    const elapsed = Date.now() - startTime;
+        const parsed = JSON.parse(rawText);
+        if (!parsed.suggestions || !Array.isArray(parsed.suggestions)) {
+          throw new Error('Định dạng dữ liệu từ AI không khớp.');
+        }
 
-    if (!response.ok) {
+        console.log(`🤖 [Google Gemini API] Nhận phản hồi thành công từ mô hình "${currentModel}" trong ${elapsed}ms:`, parsed);
+
+        return {
+          source: currentModel,
+          model: currentModel,
+          isRealAi: true,
+          isFallback,
+          fallbackFrom: isFallback ? selectedModel : null,
+          elapsed,
+          suggestions: parsed.suggestions
+        };
+      }
+
+      lastStatus = response.status;
       const errorData = await response.json().catch(() => ({}));
-      const msg = errorData.error?.message || `Lỗi HTTP ${response.status}`;
-      console.warn(`[Gemini API] Lỗi từ mô hình ${selectedModel} (${response.status}):`, msg);
-      return {
-        source: 'local_heuristic_after_error',
-        isRealAi: false,
-        errorMsg: msg,
-        failedModel: selectedModel,
-        elapsed,
-        suggestions: generateSmartFallbackHooks(topic)
-      };
+      lastError = errorData.error?.message || `Lỗi HTTP ${response.status}`;
+      failedInitialModel = currentModel;
+      console.warn(`[Gemini API] Mô hình ${currentModel} báo lỗi (${response.status}): ${lastError}. Đang thử mô hình kế tiếp...`);
+
+      // Nếu lỗi 400 (Invalid Key) thì dừng ngay vì key không hợp lệ
+      if (response.status === 400 && lastError.includes('API_KEY_INVALID')) {
+        break;
+      }
+
+      // Nếu không phải lỗi quá tải 503 hoặc 429 hoặc 404 thì dừng
+      if (response.status !== 503 && response.status !== 429 && response.status !== 404) {
+        break;
+      }
+    } catch (err) {
+      lastError = err.message;
+      failedInitialModel = currentModel;
     }
-
-    const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      throw new Error('Mô hình AI không trả về nội dung.');
-    }
-
-    const parsed = JSON.parse(rawText);
-    if (!parsed.suggestions || !Array.isArray(parsed.suggestions)) {
-      throw new Error('Định dạng dữ liệu từ AI không khớp.');
-    }
-
-    console.log(`🤖 [Google Gemini API] Nhận phản hồi thành công từ mô hình "${selectedModel}" trong ${elapsed}ms:`, parsed);
-
-    return {
-      source: selectedModel,
-      model: selectedModel,
-      isRealAi: true,
-      elapsed,
-      suggestions: parsed.suggestions
-    };
-  } catch (err) {
-    const elapsed = Date.now() - startTime;
-    console.warn(`[Gemini API] Lỗi kết nối tới mô hình ${selectedModel}:`, err.message);
-    return {
-      source: 'local_heuristic_after_error',
-      isRealAi: false,
-      errorMsg: err.message,
-      failedModel: selectedModel,
-      elapsed,
-      suggestions: generateSmartFallbackHooks(topic)
-    };
   }
+
+  const elapsed = Date.now() - startTime;
+  return {
+    source: 'local_heuristic_after_error',
+    isRealAi: false,
+    errorMsg: lastError,
+    failedModel: failedInitialModel || selectedModel,
+    elapsed,
+    suggestions: generateSmartFallbackHooks(topic)
+  };
 }
